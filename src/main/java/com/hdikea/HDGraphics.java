@@ -114,7 +114,9 @@ class LogPanel extends JPanel {
 
                 ArrayList<customer> allCustomers = getAllInformationOneList(sourceDir);
                 ArrayList<customer> extraOrders = getExtraOrders(allCustomers, logSourceDir);
-                HashMap<String, ArrayList<customer>> trucks = compareToLog.getTrucks(allCustomers);
+
+                compareToLog c = new compareToLog();
+                HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
 
                 if(allCustomers == null | extraOrders == null | trucks == null){
                     System.out.println("Error, empty lists");
@@ -133,11 +135,12 @@ class LogPanel extends JPanel {
 
     }
 
-    public static ArrayList<customer> getExtraOrders(ArrayList<customer> allCustomers, String logSourceDir) {
-        return compareToLog.crossReferenceAll(allCustomers, compareToLog.customersFromLog(logSourceDir));
+    public ArrayList<customer> getExtraOrders(ArrayList<customer> allCustomers, String logSourceDir) {
+        compareToLog c = new compareToLog();
+        return c.crossReferenceAll(allCustomers, c.customersFromLog(logSourceDir));
     }
 
-    public static ArrayList<customer> getAllInformationOneList(String sourceDir) {
+    public ArrayList<customer> getAllInformationOneList(String sourceDir) {
         ArrayList<customer> allCustomers = new ArrayList<customer>();
 
         File dir = new File(sourceDir);
@@ -145,7 +148,8 @@ class LogPanel extends JPanel {
             if (!file.isDirectory() && file.getName().endsWith("pdf")) {
 
                 /// Make this a thread
-                ArrayList<customer> customers = createTextManifest.relevantText(file.getPath());
+                createTextManifest c = new createTextManifest();
+                ArrayList<customer> customers = c.relevantText(file.getPath());
                 allCustomers.addAll(customers);
                 // Make this a thread
             }
@@ -228,8 +232,9 @@ class TwoPanel extends JPanel {
                 if (preManifest.isEmpty() || finalManifest.isEmpty())
                     return;
 
-                ArrayList<customer> first = createTextManifest.relevantText(preManifest);
-                ArrayList<customer> second = createTextManifest.relevantText(finalManifest);
+                createTextManifest c = new createTextManifest();
+                ArrayList<customer> first = c.relevantText(preManifest);
+                ArrayList<customer> second = c.relevantText(finalManifest);
 
                 if(first == null || second == null){
                     System.out.println("Error, empty lists");
@@ -248,7 +253,7 @@ class TwoPanel extends JPanel {
 
     }
 
-    public static ArrayList<customer> intersection(ArrayList<customer> first, ArrayList<customer> second) {
+    public ArrayList<customer> intersection(ArrayList<customer> first, ArrayList<customer> second) {
         ArrayList<customer> intersection = new ArrayList<customer>();
 
         for (customer customer : first) {
@@ -259,7 +264,7 @@ class TwoPanel extends JPanel {
         return intersection;
     }
 
-    public static boolean containsOrderNumber(final List<customer> list, final String order) {
+    public boolean containsOrderNumber(final List<customer> list, final String order) {
         return list.stream().anyMatch(cust -> order.equals(cust.orderNumber));
     }
 }

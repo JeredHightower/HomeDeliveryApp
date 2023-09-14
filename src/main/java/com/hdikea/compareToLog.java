@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class compareToLog {
 
-    public static HashMap<String, ArrayList<customer>> getTrucks(ArrayList<customer> allCustomers) {
+    public HashMap<String, ArrayList<customer>> getTrucks(ArrayList<customer> allCustomers) {
         HashMap<String, ArrayList<customer>> trucks = new HashMap<String, ArrayList<customer>>();
 
         for (customer customer : allCustomers) {
@@ -21,7 +21,7 @@ public class compareToLog {
         return trucks;
     }
 
-    public static ArrayList<customer> customersFromLog(String logSourceDir) {
+    public ArrayList<customer> customersFromLog(String logSourceDir) {
         ArrayList<customer> customers = new ArrayList<customer>();
 
         try {
@@ -67,7 +67,7 @@ public class compareToLog {
     }
 
     // Must call to change lists
-    public static ArrayList<customer> crossReferenceAll(ArrayList<customer> allCustomers,
+    public ArrayList<customer> crossReferenceAll(ArrayList<customer> allCustomers,
             ArrayList<customer> customersFromLog) {
 
         for (customer customer : allCustomers) {

@@ -11,10 +11,10 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 
 public class pdf2image {
 
-    public static ArrayList<String> convertManifest(String sourceDir) {
+    public ArrayList<File> convertManifest(String sourceDir) {
         try {
             File sourceFile = new File(sourceDir);
-            ArrayList<String> createdFiles = new ArrayList<>();
+            ArrayList<File> createdFiles = new ArrayList<>();
 
             if (sourceFile.exists() && sourceFile.getName().endsWith("pdf")) {
                 PDDocument document = PDDocument.load(sourceFile);
@@ -34,7 +34,8 @@ public class pdf2image {
 
                     // suffix in filename will be used as the file format
                     ImageIOUtil.writeImage(bim, sourceFile.getName() + "-" + (pageCounter) + ".png", 300);
-                    createdFiles.add(sourceFile.getName() + "-" + (pageCounter) + ".png");
+                    File img = new File(sourceFile.getName() + "-" + (pageCounter) + ".png");
+                    createdFiles.add(img);
                 }
                 document.close();
 
@@ -51,14 +52,11 @@ public class pdf2image {
         }
     }
 
-    public static void deleteTempFiles(ArrayList<String> files) {
-        File dir = new File(System.getProperty("user.dir"));
-
+    public void deleteTempFiles(ArrayList<File> files) {
         if(files == null)
             return;
             
-        for(File file: dir.listFiles()) 
-            if (!file.isDirectory() && files.contains(file.getName())) 
-                file.delete();
+        for(File file: files) 
+            file.delete();
     }
 }

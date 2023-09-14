@@ -6,6 +6,8 @@ import org.bytedeco.tesseract.*;
 import static org.bytedeco.leptonica.global.leptonica.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -14,7 +16,7 @@ import java.util.regex.Pattern;
 
 public class createTextManifest {
 
-    public static ArrayList<customer> relevantText(String sourceDir) {
+    public ArrayList<customer> relevantText(String sourceDir) {
 
         Scanner relText = new Scanner(getText(sourceDir));
 
@@ -77,17 +79,46 @@ public class createTextManifest {
         return customers;
     }
 
-    private static String getText(String sourceDir) {
-        ArrayList<String> createdFiles = pdf2image.convertManifest(sourceDir);
+    private String getText(String sourceDir) {
+        pdf2image p = new pdf2image();
+        ArrayList<File> createdFiles = p.convertManifest(sourceDir);
 
         BytePointer outText;
 
         TessBaseAPI api = new TessBaseAPI();
         // Initialize tesseract-ocr with English, without specifying tessdata path
+        
+        InputStream in = this.getClass().getClassLoader()
+                                .getResourceAsStream("language/eng.traineddata");
+        
+
+        /// TESTING
+        byte[] byteArray = null;
+        try {
+            byteArray = in.readAllBytes();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Couldn't read");
+            System.exit(1);
+        }
+
+
+        BytePointer b = new BytePointer();
+        b.put(byteArray, 0, byteArray.length);
+        System.out.println("Language Failure");
+
+        if (api.Init(b, null) != 0);{
+            System.err.println("Could not initialize tesseract.");
+            System.exit(1);
+        }
+        //// TESTING
+            
+        /*
         if (api.Init("language", "eng") != 0) {
             System.err.println("Could not initialize tesseract.");
             System.exit(1);
         }
+        */
 
         String allText = "";
         File dir = new File(System.getProperty("user.dir"));
@@ -112,7 +143,8 @@ public class createTextManifest {
 
         // Destroy used object and release memory
         api.close();
-        pdf2image.deleteTempFiles(createdFiles);
+        b.close();
+        p.deleteTempFiles(createdFiles);
 
         return allText;
     }
