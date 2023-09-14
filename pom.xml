@@ -21,6 +21,12 @@
   <dependencies>
 
     <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox-tools</artifactId>
       <version>2.0.29</version>
@@ -77,16 +83,6 @@
   </dependencies>
 
   <build>
-
-  <resources>
-        <resource>
-            <directory>$homedeliveryapp/language</directory>
-            <includes>
-                <include>eng.traineddata</include>
-            </includes>
-        </resource>
-    </resources>
-    
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->

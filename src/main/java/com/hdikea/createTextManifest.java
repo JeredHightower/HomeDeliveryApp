@@ -1,5 +1,7 @@
 package com.hdikea;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.leptonica.*;
 import org.bytedeco.tesseract.*;
@@ -88,30 +90,24 @@ public class createTextManifest {
         TessBaseAPI api = new TessBaseAPI();
         // Initialize tesseract-ocr with English, without specifying tessdata path
         
-        InputStream in = this.getClass().getClassLoader()
-                                .getResourceAsStream("language/eng.traineddata");
-        
-
-        /// TESTING
-        byte[] byteArray = null;
+        InputStream inputStream = this.getClass().getClassLoader()
+        .getResourceAsStream("eng.traineddata");
+		File somethingFile;
         try {
-            byteArray = in.readAllBytes();
+            somethingFile = File.createTempFile("eng", ".traineddata");
+            FileUtils.copyInputStreamToFile(inputStream, somethingFile);
         } catch (IOException e) {
+            somethingFile = null;
+            System.out.println("file not found");
+            System.exit(1);
             e.printStackTrace();
-            System.out.println("Couldn't read");
-            System.exit(1);
         }
 
-
-        BytePointer b = new BytePointer();
-        b.put(byteArray, 0, byteArray.length);
-        System.out.println("Language Failure");
-
-        if (api.Init(b, null) != 0);{
-            System.err.println("Could not initialize tesseract.");
+		if (api.Init(somethingFile.getParent(),
+				FilenameUtils.getBaseName(somethingFile.getName())) != 0) {
+			System.err.println("Could not initialize tesseract.");
             System.exit(1);
-        }
-        //// TESTING
+		}
             
         /*
         if (api.Init("language", "eng") != 0) {
@@ -143,7 +139,6 @@ public class createTextManifest {
 
         // Destroy used object and release memory
         api.close();
-        b.close();
         p.deleteTempFiles(createdFiles);
 
         return allText;
