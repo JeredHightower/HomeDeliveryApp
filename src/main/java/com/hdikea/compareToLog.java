@@ -92,4 +92,21 @@ public class compareToLog {
 
         return customersFromLog;
     }
+
+    public ArrayList<customer> getAllInformationOneList(String sourceDir) {
+        ArrayList<customer> allCustomers = new ArrayList<customer>();
+
+        File dir = new File(sourceDir);
+        for (File file : dir.listFiles())
+            if (!file.isDirectory() && file.getName().endsWith("pdf")) {
+
+                /// Make this a thread
+                createTextManifest c = new createTextManifest();
+                ArrayList<customer> customers = c.relevantText(file.getPath());
+                allCustomers.addAll(customers);
+                // Make this a thread
+            }
+
+        return allCustomers;
+    }
 }

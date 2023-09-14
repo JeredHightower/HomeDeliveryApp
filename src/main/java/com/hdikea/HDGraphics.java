@@ -33,8 +33,80 @@ public class HDGraphics extends JFrame {
         setBounds(100, 100, 1000, 500);
 
         TabbedPane.addTab("Compare Manifests To Log", new LogPanel());
-        TabbedPane.addTab("Compare Two Manifests", new TwoPanel());
+        TabbedPane.addTab("Compare Manifests", new TwoPanel());
+        TabbedPane.addTab("View Manifests", new ViewManifestPanel());
         add(TabbedPane);
+    }
+}
+
+class ViewManifestPanel extends JPanel {
+    JTabbedPane TabbedPane = new JTabbedPane();
+    JPanel buttons = new JPanel(new FlowLayout());
+    Preferences prefs = Preferences.userRoot().node(getClass().getName());
+
+    public ViewManifestPanel() {
+        setLayout(new BorderLayout());
+        setBackground(new Color(173, 216, 230));
+        setBorder(new LineBorder(Color.BLUE));
+
+        JButton BtnFolder = new JButton("Select Manifest Folder");
+        JTextField folderLoc = new JTextField("", 20);
+        folderLoc.setEditable(false);
+        JButton generate = new JButton("Generate");
+
+        buttons.add(BtnFolder);
+        buttons.add(folderLoc);
+        buttons.add(generate);
+
+        buttons.setBackground(new Color(255, 255, 153));
+
+        add(buttons, BorderLayout.PAGE_START);
+        add(TabbedPane, BorderLayout.CENTER);
+
+        BtnFolder.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser(
+                        prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int r = fileChooser.showOpenDialog(null);
+
+                if (r == JFileChooser.APPROVE_OPTION) {
+                    // set the label to the path of the selected directory
+                    folderLoc.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                    prefs.put("LAST_USED_FOLDER", fileChooser.getSelectedFile().getParent());
+                }
+                // if the user cancelled the operation
+                else
+                    return;
+            }
+        });
+
+        generate.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String sourceDir = folderLoc.getText();
+
+                if (sourceDir.isEmpty())
+                    return;
+
+                TabbedPane.removeAll();
+
+                compareToLog c = new compareToLog();
+                ArrayList<customer> allCustomers = c.getAllInformationOneList(sourceDir);
+                HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
+
+                if (allCustomers == null | trucks == null) {
+                    System.out.println("Error, empty lists");
+                    TabbedPane.removeAll();
+                    TabbedPane.add("Error", new errorPanel());
+                    return;
+                }
+
+                for (String truckNumber : trucks.keySet()) {
+                    TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber), false));
+                }
+            }
+        });
+
     }
 }
 
@@ -46,7 +118,7 @@ class LogPanel extends JPanel {
 
     public LogPanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(173,216,230));
+        setBackground(new Color(173, 216, 230));
         setBorder(new LineBorder(Color.BLUE));
 
         JButton BtnLog = new JButton("Select Log (.csv)");
@@ -63,14 +135,15 @@ class LogPanel extends JPanel {
         buttons.add(logLoc);
         buttons.add(generate);
 
-        buttons.setBackground(new Color(255,255,153));
+        buttons.setBackground(new Color(255, 255, 153));
 
         add(buttons, BorderLayout.PAGE_START);
         add(TabbedPane, BorderLayout.CENTER);
 
         BtnFolder.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser(prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
+                JFileChooser fileChooser = new JFileChooser(
+                        prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 int r = fileChooser.showOpenDialog(null);
 
@@ -87,7 +160,8 @@ class LogPanel extends JPanel {
 
         BtnLog.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser(prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
+                JFileChooser fileChooser = new JFileChooser(
+                        prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 int r = fileChooser.showOpenDialog(null);
 
@@ -112,23 +186,22 @@ class LogPanel extends JPanel {
 
                 TabbedPane.removeAll();
 
-                ArrayList<customer> allCustomers = getAllInformationOneList(sourceDir);
-                ArrayList<customer> extraOrders = getExtraOrders(allCustomers, logSourceDir);
-
                 compareToLog c = new compareToLog();
+                ArrayList<customer> allCustomers = c.getAllInformationOneList(sourceDir);
+                ArrayList<customer> extraOrders = getExtraOrders(allCustomers, logSourceDir);
                 HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
 
-                if(allCustomers == null | extraOrders == null | trucks == null){
+                if (allCustomers == null | extraOrders == null | trucks == null) {
                     System.out.println("Error, empty lists");
                     TabbedPane.removeAll();
                     TabbedPane.add("Error", new errorPanel());
                     return;
                 }
 
-                TabbedPane.add("Extra Orders", new ManifestPanel(extraOrders));
+                TabbedPane.add("Extra Orders", new ManifestPanel(extraOrders, true));
 
                 for (String truckNumber : trucks.keySet()) {
-                    TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber)));
+                    TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber), false));
                 }
             }
         });
@@ -139,24 +212,6 @@ class LogPanel extends JPanel {
         compareToLog c = new compareToLog();
         return c.crossReferenceAll(allCustomers, c.customersFromLog(logSourceDir));
     }
-
-    public ArrayList<customer> getAllInformationOneList(String sourceDir) {
-        ArrayList<customer> allCustomers = new ArrayList<customer>();
-
-        File dir = new File(sourceDir);
-        for (File file : dir.listFiles())
-            if (!file.isDirectory() && file.getName().endsWith("pdf")) {
-
-                /// Make this a thread
-                createTextManifest c = new createTextManifest();
-                ArrayList<customer> customers = c.relevantText(file.getPath());
-                allCustomers.addAll(customers);
-                // Make this a thread
-            }
-
-        return allCustomers;
-    }
-
 }
 
 class TwoPanel extends JPanel {
@@ -167,13 +222,13 @@ class TwoPanel extends JPanel {
 
     public TwoPanel() {
         setLayout(new BorderLayout());
-        setBackground(new Color(173,216,230));
+        setBackground(new Color(173, 216, 230));
         setBorder(new LineBorder(Color.BLUE));
 
-        JButton BtnPre = new JButton("Select Pre Manifest");
+        JButton BtnPre = new JButton("Select Pre Folder");
         JTextField preLoc = new JTextField("", 20);
         preLoc.setEditable(false);
-        JButton BtnFinal = new JButton("Select Final Manifest");
+        JButton BtnFinal = new JButton("Select Final Folder");
         JTextField finaLoc = new JTextField("", 20);
         finaLoc.setEditable(false);
         JButton generate = new JButton("Generate");
@@ -184,15 +239,16 @@ class TwoPanel extends JPanel {
         buttons.add(finaLoc);
         buttons.add(generate);
 
-        buttons.setBackground(new Color(255,255,153));
+        buttons.setBackground(new Color(255, 255, 153));
 
         add(buttons, BorderLayout.PAGE_START);
         add(TabbedPane, BorderLayout.CENTER);
 
         BtnPre.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser(prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                JFileChooser fileChooser = new JFileChooser(
+                        prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 int r = fileChooser.showOpenDialog(null);
 
                 if (r == JFileChooser.APPROVE_OPTION) {
@@ -208,8 +264,9 @@ class TwoPanel extends JPanel {
 
         BtnFinal.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser(prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                JFileChooser fileChooser = new JFileChooser(
+                        prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 int r = fileChooser.showOpenDialog(null);
 
                 if (r == JFileChooser.APPROVE_OPTION) {
@@ -232,11 +289,37 @@ class TwoPanel extends JPanel {
                 if (preManifest.isEmpty() || finalManifest.isEmpty())
                     return;
 
+                TabbedPane.removeAll();
+
+                ////// New
+                compareToLog c = new compareToLog();
+                ArrayList<customer> allPreCustomers = c.getAllInformationOneList(preManifest);
+                ArrayList<customer> allFinalCustomers = c.getAllInformationOneList(finalManifest);
+                HashMap<String, ArrayList<customer>> pretrucks = c.getTrucks(allPreCustomers);
+                HashMap<String, ArrayList<customer>> finaltrucks = c.getTrucks(allFinalCustomers);
+
+                for (String truckNumber : finaltrucks.keySet()) {
+                    ArrayList<customer> first = pretrucks.get(truckNumber);
+                    ArrayList<customer> second = finaltrucks.get(truckNumber);
+
+                    if (first == null || second == null) {
+                        System.out.println("Error, empty lists");
+                        TabbedPane.add("Error", new errorPanel());
+                    } else {
+                        ArrayList<customer> removedFromPre = intersection(first, second);
+                        ArrayList<customer> addedtoFinal = intersection(second, first);
+
+                        TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(removedFromPre, addedtoFinal));
+                    }
+                }
+                //////////
+
+                /*
                 createTextManifest c = new createTextManifest();
                 ArrayList<customer> first = c.relevantText(preManifest);
                 ArrayList<customer> second = c.relevantText(finalManifest);
 
-                if(first == null || second == null){
+                if (first == null || second == null) {
                     System.out.println("Error, empty lists");
                     TabbedPane.removeAll();
                     TabbedPane.add("Error", new errorPanel());
@@ -245,9 +328,9 @@ class TwoPanel extends JPanel {
 
                 ArrayList<customer> removedFromPre = intersection(first, second);
                 ArrayList<customer> addedtoFinal = intersection(second, first);
-                
-                TabbedPane.removeAll();
+
                 TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(removedFromPre, addedtoFinal));
+                */
             }
         });
 
@@ -271,7 +354,7 @@ class TwoPanel extends JPanel {
 
 class ManifestPanel extends JPanel {
 
-    public ManifestPanel(ArrayList<customer> customers) {
+    public ManifestPanel(ArrayList<customer> customers, boolean reverse) {
         setLayout(new BorderLayout());
 
         String output = String.format(
@@ -279,13 +362,25 @@ class ManifestPanel extends JPanel {
                 "Order Number", "Name", "Carts", "Location", "Stop") + "\n\n";
 
         // HEY THIS IS VERY IMPORTANT RIGHT HERE
+        if(reverse){
         Collections.sort(customers,
                 (o1, o2) -> o1.location.compareTo(o2.location));
         Collections.sort(customers, Collections.reverseOrder());
+        }
+        else{
+            output = String.format(
+                "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
+                "Order Number", "Name", "Stop") + "\n";
+        }
         ///////////////////
 
         for (customer customer : customers) {
-            output += customer + "\n";
+
+            if(reverse)
+                output += customer + "\n";
+            else
+                output += String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
+                    customer.orderNumber, customer.name, customer.stop) + "\n";
         }
 
         output += "\n";
@@ -306,7 +401,7 @@ class AddedMissingPanel extends JPanel {
     public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal) {
         setLayout(new BorderLayout());
         String output = "";
-        
+
         output += "Added to Final Manifest\n";
         output += String.format(
                 "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
@@ -317,7 +412,7 @@ class AddedMissingPanel extends JPanel {
                     customer.orderNumber, customer.name, customer.stop) + "\n";
         }
 
-        if(addedtoFinal.isEmpty())
+        if (addedtoFinal.isEmpty())
             output += "Nothing Changed\n";
 
         output += "\nRemoved from Pre Manifest\n";
@@ -329,10 +424,8 @@ class AddedMissingPanel extends JPanel {
                     customer.orderNumber, customer.name, customer.stop) + "\n";
         }
 
-        if(removedFromPre.isEmpty())
+        if (removedFromPre.isEmpty())
             output += "Nothing Changed";
-
-
 
         JTextArea info = new JTextArea(output);
         info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
