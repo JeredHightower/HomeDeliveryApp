@@ -37,6 +37,7 @@ public class createTextManifest {
         String orderNumber = "";
         String name = "";
         String truckNumber = "";
+        String header = "";
 
         ArrayList<customer> customers = new ArrayList<>();
 
@@ -55,11 +56,12 @@ public class createTextManifest {
                     getName = true;
                 }
             } else if (getOrderNumber) {
-                Pattern p = Pattern.compile("(?:LCD|CCD).*?(\\d{9})");
+                Pattern p = Pattern.compile("((?:LCD|CCD).*?)(\\d{9})");
                 Matcher m = p.matcher(currentLine);
 
                 if (m.find()) {
-                    orderNumber = m.group(1);
+                    header = m.group(1);
+                    orderNumber = m.group(2);
 
                     getOrderNumber = false;
                     getName = true;
@@ -70,7 +72,7 @@ public class createTextManifest {
 
                 if (m.find()) {
                     name = currentLine.substring(0, m.start()).trim();
-                    customers.add(new customer(orderNumber, name, counter++, truckNumber));
+                    customers.add(new customer(orderNumber, name, counter++, truckNumber, header));
 
                     getName = false;
                     getOrderNumber = true;

@@ -1,10 +1,15 @@
 package com.hdikea;
+
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Scanner;
+
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class compareToLog {
 
@@ -27,38 +32,61 @@ public class compareToLog {
         try {
             File fl = new File(logSourceDir);
 
-            if(!fl.getName().endsWith("csv") || !fl.exists())
+            if (!fl.getName().endsWith("xlsx") || !fl.exists())
                 return null;
 
-            Scanner sc = new Scanner(new File(logSourceDir));
+            XSSFWorkbook input = new XSSFWorkbook(fl);
 
-            if(!sc.hasNextLine())
+            XSSFExcelExtractor xlsx = new XSSFExcelExtractor(input);
+            String tsv = xlsx.getText();
+            Scanner sc = new Scanner(tsv);
+
+            if (!sc.hasNextLine()) {
+                xlsx.close();
+                sc.close();
                 return null;
-
-            sc.nextLine();
-
-            while (sc.hasNextLine()) {
-                String[] item = sc.nextLine().split(",");
-                String name = "";
-                String carts = "";
-                String orderNumber = "";
-                String location = "";
-
-                if (item.length > 0)
-                    name = item[0].trim();
-                if (item.length > 1)
-                    carts = item[1].trim();
-                if (item.length > 2)
-                    orderNumber = item[2].trim();
-                if (item.length > 3)
-                    location = item[3].trim();
-
-                customers.add(new customer(orderNumber, name, 0, "", carts, location));
+            }
+            else{
+            // Skip title line
+            System.out.println(sc.nextLine());
             }
 
+            if (!sc.hasNextLine()) {
+                xlsx.close();
+                sc.close();
+                return null;
+            }{
+            // Skip first line
+            System.out.println(sc.nextLine());
+            }
+
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                if (!line.isEmpty()) {
+                    String[] item = line.split("\t");
+                    String name = "";
+                    String carts = "";
+                    String orderNumber = "";
+                    String location = "";
+
+                    if (item.length > 0)
+                        name = item[0].trim();
+                    if (item.length > 1)
+                        carts = item[1].trim();
+                    if (item.length > 2)
+                        orderNumber = item[2].trim();
+                    if (item.length > 3)
+                        location = item[3].trim();
+
+                    customers.add(new customer(orderNumber, name, 0, "", carts, location, ""));
+                }
+            }
+
+            xlsx.close();
+            sc.close();
             return customers;
 
-        } catch (FileNotFoundException e) {
+        } catch (InvalidFormatException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -90,6 +118,7 @@ public class compareToLog {
             }
         }
 
+        // ORDERS NOT FOUND ON ANY MANIFEST
         return customersFromLog;
     }
 

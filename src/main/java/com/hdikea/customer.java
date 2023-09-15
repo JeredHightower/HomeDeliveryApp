@@ -2,6 +2,7 @@ package com.hdikea;
 
 public class customer implements Comparable<customer> {
 
+    public String header;
     public String orderNumber;
     public String name;
     public int stop;
@@ -9,20 +10,22 @@ public class customer implements Comparable<customer> {
     public String location = "Missing";
     public String carts = "";
 
-    public customer(String orderNumber, String name, int stop, String truckNumber) {
+    public customer(String orderNumber, String name, int stop, String truckNumber, String header) {
         this.orderNumber = orderNumber;
         this.name = name;
         this.stop = stop;
         this.truckNumber = truckNumber;
+        this.header = header;
     }
 
-    public customer(String orderNumber, String name, int stop, String truckNumber, String carts, String location) {
+    public customer(String orderNumber, String name, int stop, String truckNumber, String carts, String location, String header) {
         this.orderNumber = orderNumber;
         this.name = name;
         this.stop = stop;
         this.truckNumber = truckNumber;
         this.carts = carts;
         this.location = location;
+        this.header = header;
     }
 
     public boolean isReturn() {
@@ -33,7 +36,7 @@ public class customer implements Comparable<customer> {
     }
 
     public String toString() {
-        return String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s", orderNumber, name, carts, location, stop);
+        return String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s", header, orderNumber, name, carts, location, stop);
 
         // return orderNumber + " " + name + " " + carts + " " + location + " Stop:" + stop;
     }
