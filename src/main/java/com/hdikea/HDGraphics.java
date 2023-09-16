@@ -384,7 +384,7 @@ class TwoPanel extends JPanel {
                         ArrayList<customer> removedFromPre = intersection(first, second);
                         ArrayList<customer> addedtoFinal = intersection(second, first);
 
-                        TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(allFinalCustomers.get(0).truckNumber, removedFromPre, addedtoFinal));
+                        TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(removedFromPre, addedtoFinal));
                     }
                 }
                 //////////
@@ -504,7 +504,7 @@ class ManifestPanel extends JPanel {
 
 class AddedMissingPanel extends JPanel {
 
-    public AddedMissingPanel(String truckNumber, ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal) {
+    public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal) {
         setLayout(new BorderLayout());
         String output = "";
 
@@ -542,6 +542,14 @@ class AddedMissingPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    String truckNumber = "";
+                    
+                    if(!removedFromPre.isEmpty())
+                        truckNumber = removedFromPre.get(0).truckNumber;
+                    
+                    if(!addedtoFinal.isEmpty())
+                        truckNumber = addedtoFinal.get(0).truckNumber;
+
                     JTextArea temp = new JTextArea(truckNumber + "\n\n" + info.getText());
                     temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
 
