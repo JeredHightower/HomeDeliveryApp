@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.print.PrinterException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.prefs.Preferences;
 
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.OrientationRequested;
+import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -22,6 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.border.LineBorder;
 
 public class HDGraphics extends JFrame {
@@ -244,14 +251,12 @@ class TwoPanel extends JPanel {
         setBackground(new Color(173, 216, 230));
         setBorder(new LineBorder(Color.BLUE));
 
-
         JButton BtnPre = new JButton("Select Pre Folder");
         JTextField preLoc = new JTextField("", 40);
         preLoc.setEditable(false);
         preLoc.setMaximumSize(preLoc.getPreferredSize());
         tab1.add(BtnPre);
         tab1.add(preLoc);
-
 
         JButton BtnFinal = new JButton("Select Final Folder");
         JTextField finaLoc = new JTextField("", 40);
@@ -283,7 +288,6 @@ class TwoPanel extends JPanel {
         buttons.setBackground(new Color(255, 255, 153));
         BoxLayout boxlayout = new BoxLayout(buttons, BoxLayout.Y_AXIS);
         buttons.setLayout(boxlayout);
-        
 
         add(buttons, BorderLayout.PAGE_START);
         add(TabbedPane, BorderLayout.CENTER);
@@ -352,7 +356,6 @@ class TwoPanel extends JPanel {
                 if (preManifest.isEmpty() || finalManifest.isEmpty())
                     return;
 
-                
                 compareToLog c = new compareToLog();
 
                 ArrayList<customer> allPreCustomers = c.getAllInformationOneList(preManifest);
@@ -368,7 +371,6 @@ class TwoPanel extends JPanel {
 
                 HashMap<String, ArrayList<customer>> pretrucks = c.getTrucks(allPreCustomers);
                 HashMap<String, ArrayList<customer>> finaltrucks = c.getTrucks(allFinalCustomers);
-                
 
                 TabbedPane.removeAll();
                 for (String truckNumber : finaltrucks.keySet()) {
@@ -432,13 +434,14 @@ class ManifestPanel extends JPanel {
         setLayout(new BorderLayout());
 
         String output = String.format(
-                "%" + -20 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s",
+                "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10
+                        + "s",
                 "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n\n";
 
-        if(extra){
+        if (extra) {
             output = String.format(
-                "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s",
-                "Order Number", "Name", "Carts", "Location", "Stop") + "\n\n";
+                    "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s",
+                    "Order Number", "Name", "Carts", "Location") + "\n\n";
         }
 
         // HEY THIS IS VERY IMPORTANT RIGHT HERE
@@ -448,7 +451,7 @@ class ManifestPanel extends JPanel {
             Collections.sort(customers, Collections.reverseOrder());
         } else {
             output = String.format(
-                    "%" + -20 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
+                    "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
                     "Header", "Order Number", "Name", "Stop") + "\n";
         }
         ///////////////////
@@ -456,12 +459,12 @@ class ManifestPanel extends JPanel {
         for (customer customer : customers) {
 
             if (extra)
-                output += String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
-                        customer.orderNumber, customer.name, customer.stop) + "\n";
-            else if(reverse)
+                output += String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "\n",
+                        customer.orderNumber, customer.name, customer.carts, customer.location);
+            else if (reverse)
                 output += customer + "\n";
             else
-                output += String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
+                output += String.format("%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
                         customer.header, customer.orderNumber, customer.name, customer.stop) + "\n";
         }
 
@@ -469,6 +472,27 @@ class ManifestPanel extends JPanel {
 
         JTextArea info = new JTextArea(output);
         info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+        getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK),
+                "Print");
+        getActionMap().put("Print", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    JTextArea temp = new JTextArea(customers.get(0).truckNumber + "\n\n" + info.getText());
+                    temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
+
+                    PrintRequestAttributeSet atts = new HashPrintRequestAttributeSet();
+                    atts.add(OrientationRequested.LANDSCAPE);
+
+                    temp.print(null, null, true, null, atts, true);
+                } catch (PrinterException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                System.out.println("test");
+            }
+        });
 
         JScrollPane scroll = new JScrollPane(info);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -486,7 +510,8 @@ class AddedMissingPanel extends JPanel {
 
         output += "Added to Final Manifest\n";
         output += String.format(
-                "%" + -20 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s",
+                "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10
+                        + "s",
                 "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n";
 
         for (customer customer : addedtoFinal) {
@@ -498,7 +523,8 @@ class AddedMissingPanel extends JPanel {
 
         output += "\nRemoved from Pre Manifest\n";
         output += String.format(
-                "%" + -20 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s",
+                "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10
+                        + "s",
                 "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n";
         for (customer customer : removedFromPre) {
             output += customer + "\n";
@@ -509,6 +535,27 @@ class AddedMissingPanel extends JPanel {
 
         JTextArea info = new JTextArea(output);
         info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+        getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK),
+                "Print");
+        getActionMap().put("Print", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    JTextArea temp = new JTextArea(addedtoFinal.get(0).truckNumber + "\n\n" + info.getText());
+                    temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
+
+                    PrintRequestAttributeSet atts = new HashPrintRequestAttributeSet();
+                    atts.add(OrientationRequested.LANDSCAPE);
+
+                    temp.print(null, null, true, null, atts, true);
+                } catch (PrinterException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                System.out.println("test");
+            }
+        });
 
         JScrollPane scroll = new JScrollPane(info);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -522,19 +569,6 @@ class errorPanel extends JPanel {
     public errorPanel() {
         setLayout(new BorderLayout());
         String output = "An error occured";
-
-        JTextArea info = new JTextArea(output);
-        info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-
-        add(info);
-    }
-}
-
-class loadingPanel extends JPanel {
-
-    public loadingPanel() {
-        setLayout(new BorderLayout());
-        String output = "Loading...";
 
         JTextArea info = new JTextArea(output);
         info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));

@@ -36,7 +36,7 @@ public class customer implements Comparable<customer> {
     }
 
     public String toString() {
-        return String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s", header, orderNumber, name, carts, location, stop);
+        return String.format("%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s", header, orderNumber, name, carts, location, stop);
 
         // return orderNumber + " " + name + " " + carts + " " + location + " Stop:" + stop;
     }

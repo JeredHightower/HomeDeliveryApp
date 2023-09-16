@@ -16,6 +16,9 @@ public class compareToLog {
     public HashMap<String, ArrayList<customer>> getTrucks(ArrayList<customer> allCustomers) {
         HashMap<String, ArrayList<customer>> trucks = new HashMap<String, ArrayList<customer>>();
 
+        if(allCustomers == null)
+            return null;
+
         for (customer customer : allCustomers) {
             if (!trucks.containsKey(customer.truckNumber))
                 trucks.put(customer.truckNumber, new ArrayList<customer>());
@@ -98,6 +101,9 @@ public class compareToLog {
     public ArrayList<customer> crossReferenceAll(ArrayList<customer> allCustomers,
             ArrayList<customer> customersFromLog) {
 
+        if(allCustomers == null | customersFromLog == null)
+                return null;
+
         for (customer customer : allCustomers) {
 
             if (customer.isReturn())
@@ -132,6 +138,10 @@ public class compareToLog {
                 /// Make this a thread
                 createTextManifest c = new createTextManifest();
                 ArrayList<customer> customers = c.relevantText(file.getPath());
+                
+                if(customers == null)
+                    return null;
+
                 allCustomers.addAll(customers);
                 // Make this a thread
             }
