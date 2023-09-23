@@ -481,11 +481,7 @@ class ManifestPanel extends JPanel {
                 try {
                     JTextArea temp = new JTextArea(customers.get(0).truckNumber + "\n\n" + info.getText());
                     temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
-
-                    PrintRequestAttributeSet atts = new HashPrintRequestAttributeSet();
-                    atts.add(OrientationRequested.LANDSCAPE);
-
-                    temp.print(null, null, true, null, atts, true);
+                    temp.print();
                 } catch (PrinterException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -507,6 +503,14 @@ class AddedMissingPanel extends JPanel {
     public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal) {
         setLayout(new BorderLayout());
         String output = "";
+
+        Collections.sort(removedFromPre,
+                    (o1, o2) -> o1.location.compareTo(o2.location));
+            Collections.sort(removedFromPre, Collections.reverseOrder());
+
+        Collections.sort(addedtoFinal,
+                    (o1, o2) -> o1.location.compareTo(o2.location));
+            Collections.sort(addedtoFinal, Collections.reverseOrder());
 
         output += "Added to Final Manifest\n";
         output += String.format(
@@ -552,11 +556,7 @@ class AddedMissingPanel extends JPanel {
 
                     JTextArea temp = new JTextArea(truckNumber + "\n\n" + info.getText());
                     temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
-
-                    PrintRequestAttributeSet atts = new HashPrintRequestAttributeSet();
-                    atts.add(OrientationRequested.LANDSCAPE);
-
-                    temp.print(null, null, true, null, atts, true);
+                    temp.print();
                 } catch (PrinterException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
