@@ -97,7 +97,7 @@ public class compareToLog {
         return null;
     }
 
-    // Must call to change lists
+    // Must call to change lists (add locations)
     public ArrayList<customer> crossReferenceAll(ArrayList<customer> allCustomers,
             ArrayList<customer> customersFromLog) {
 
@@ -106,11 +106,11 @@ public class compareToLog {
 
         for (customer customer : allCustomers) {
 
-            if (customer.isReturn())
+            if (customer.isReturn() && !customer.isXChange())
                 customer.location = "Return";
 
             for (Iterator<customer> it = customersFromLog.iterator(); it.hasNext();) {
-                if (customer.isReturn()) {
+                if (customer.isReturn() && !customer.isXChange()) {
                     break;
                 }
 
@@ -118,7 +118,10 @@ public class compareToLog {
                 if (customer.compareTo(customer2) == 0) {
                     customer.location = customer2.location;
                     customer.carts = customer2.carts;
-                    it.remove();
+
+                    // Assumes return will appear before order on manifest
+                    if(!(customer.isXChange() && customer.isReturn()))
+                        it.remove();
                     break;
                 }
             }
@@ -128,6 +131,7 @@ public class compareToLog {
         return customersFromLog;
     }
 
+    /// Searches directories and processes all manifests
     public ArrayList<customer> getAllInformationOneList(String sourceDir) {
         ArrayList<customer> allCustomers = new ArrayList<customer>();
 

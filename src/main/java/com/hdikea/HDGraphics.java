@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -27,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -39,7 +39,7 @@ public class HDGraphics extends JFrame {
     public HDGraphics(String title) {
         super(title);
         // Sample 01: Set Size and Position
-        setBounds(100, 100, 1000, 700);
+        setBounds(100, 100, 1280, 720);
 
         TabbedPane.addTab("Compare Manifests To Log", new LogPanel());
         TabbedPane.addTab("Compare Manifests (Auto)", new TwoPanel());
@@ -215,6 +215,7 @@ class LogPanel extends JPanel {
                 ArrayList<customer> extraOrders = getExtraOrders(allCustomers, logSourceDir);
                 HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
 
+
                 if (allCustomers == null | extraOrders == null | trucks == null) {
                     System.out.println("Error, empty lists");
                     TabbedPane.removeAll();
@@ -389,26 +390,6 @@ class TwoPanel extends JPanel {
                         TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(removedFromPre, addedtoFinal));
                     }
                 }
-                //////////
-
-                /*
-                 * createTextManifest c = new createTextManifest();
-                 * ArrayList<customer> first = c.relevantText(preManifest);
-                 * ArrayList<customer> second = c.relevantText(finalManifest);
-                 * 
-                 * if (first == null || second == null) {
-                 * System.out.println("Error, empty lists");
-                 * TabbedPane.removeAll();
-                 * TabbedPane.add("Error", new errorPanel());
-                 * return;
-                 * }
-                 * 
-                 * ArrayList<customer> removedFromPre = intersection(first, second);
-                 * ArrayList<customer> addedtoFinal = intersection(second, first);
-                 * 
-                 * TabbedPane.add(first.get(0).truckNumber, new
-                 * AddedMissingPanel(removedFromPre, addedtoFinal));
-                 */
             }
         });
 
@@ -545,6 +526,7 @@ class TwoPanelManual extends JPanel {
                 String preManifest = preLoc.getText();
                 String finalManifest = finaLoc.getText();
                 String logSourceDir = logLoc.getText();
+                JTabbedPaneWithCloseButton close = new JTabbedPaneWithCloseButton();
 
                 if (preManifest.isEmpty() || finalManifest.isEmpty())
                     return;
@@ -555,8 +537,10 @@ class TwoPanelManual extends JPanel {
 
                 if (first == null || second == null) {
                     System.out.println("Error, empty lists");
-                    TabbedPane.removeAll();
-                    TabbedPane.add("Error", new errorPanel());
+                    JPanel err = new errorPanel();
+                    TabbedPane.add("Error", err);
+                    TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(err),
+                            close.getTitlePanel(TabbedPane, err, "Error"));
                     return;
                 }
 
@@ -574,8 +558,8 @@ class TwoPanelManual extends JPanel {
                 JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal);
                 TabbedPane.add(second.get(0).truckNumber, panel);
 
-                JTabbedPaneWithCloseButton close = new JTabbedPaneWithCloseButton();
-                TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(panel), close.getTitlePanel(TabbedPane, panel, second.get(0).truckNumber));
+                TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(panel),
+                        close.getTitlePanel(TabbedPane, panel, second.get(0).truckNumber));
             }
         });
 
@@ -602,45 +586,44 @@ class ManifestPanel extends JPanel {
     public ManifestPanel(ArrayList<customer> customers, boolean reverse, boolean extra) {
         setLayout(new BorderLayout());
 
-        String output = String.format(
-                "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10
-                        + "s",
-                "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n\n";
+        // Remove empty elements from log list
+        if(reverse && extra)
+            customers.removeIf(c -> c.orderNumber.isBlank());
 
-        if (extra) {
-            output = String.format(
-                    "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s",
-                    "Order Number", "Name", "Carts", "Location") + "\n\n";
-        }
+        /// false, false: View Manifest | true, true: Extra Orders | true, false:
+        /// ComparingtoLog
+        /////////
+        String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
+        if (extra)
+            column_names = new String[] { "Order Number", "Name", "Carts", "Location" };
+        else if (!reverse)
+            column_names = new String[] { "Header", "Order Number", "Name", "Stop" };
+
+        String[][] data = new String[customers.size() + 1][column_names.length];
+        /////////
 
         // HEY THIS IS VERY IMPORTANT RIGHT HERE
         if (reverse) {
             Collections.sort(customers,
                     (o1, o2) -> o1.location.compareTo(o2.location));
             Collections.sort(customers, Collections.reverseOrder());
-        } else {
-            output = String.format(
-                    "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
-                    "Header", "Order Number", "Name", "Stop") + "\n";
         }
-        ///////////////////
+        ////////
 
-        for (customer customer : customers) {
+        for (int i = 0; i < customers.size(); i++) {
+            customer customer = customers.get(i);
 
+            String[] item = { customer.header, customer.orderNumber, customer.name, customer.carts, customer.location,
+                    "" + customer.stop };
             if (extra)
-                output += String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "\n",
-                        customer.orderNumber, customer.name, customer.carts, customer.location);
-            else if (reverse)
-                output += customer + "\n";
-            else
-                output += String.format("%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
-                        customer.header, customer.orderNumber, customer.name, customer.stop) + "\n";
+                item = new String[] { customer.orderNumber, customer.name, customer.carts, customer.location };
+            else if (!reverse)
+                item = new String[] { customer.header, customer.orderNumber, customer.name, "" + customer.stop };
+
+            data[i] = item;
         }
 
-        output += "\n";
-
-        JTextArea info = new JTextArea(output);
-        info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        JTable info = new JTable(data, column_names);
 
         getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK),
                 "Print");
@@ -648,16 +631,79 @@ class ManifestPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    JTextArea temp = new JTextArea(customers.get(0).truckNumber + "\n\n" + info.getText());
-                    temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
-                    temp.print();
+                    info.print();
                 } catch (PrinterException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
-                System.out.println("test");
             }
         });
+
+        /*
+         * String output = String.format(
+         * "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" +
+         * -10 + "s" + "%" + -10
+         * + "s",
+         * "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n\n";
+         * 
+         * if (extra) {
+         * output = String.format(
+         * "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s",
+         * "Order Number", "Name", "Carts", "Location") + "\n\n";
+         * }
+         * 
+         * // HEY THIS IS VERY IMPORTANT RIGHT HERE
+         * if (reverse) {
+         * Collections.sort(customers,
+         * (o1, o2) -> o1.location.compareTo(o2.location));
+         * Collections.sort(customers, Collections.reverseOrder());
+         * } else {
+         * output = String.format(
+         * "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
+         * "Header", "Order Number", "Name", "Stop") + "\n";
+         * }
+         * ///////////////////
+         * 
+         * for (customer customer : customers) {
+         * 
+         * if (extra)
+         * output += String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" +
+         * "%" + -10 + "s" + "\n",
+         * customer.orderNumber, customer.name, customer.carts, customer.location);
+         * else if (reverse)
+         * output += customer + "\n";
+         * else
+         * output += String.format("%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" +
+         * "%" + -10 + "s",
+         * customer.header, customer.orderNumber, customer.name, customer.stop) + "\n";
+         * }
+         * 
+         * output += "\n";
+         * 
+         * JTextArea info = new JTextArea(output);
+         * info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+         * 
+         * getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+         * KeyEvent.CTRL_DOWN_MASK),
+         * "Print");
+         * getActionMap().put("Print", new AbstractAction() {
+         * 
+         * @Override
+         * public void actionPerformed(ActionEvent e) {
+         * try {
+         * JTextArea temp = new JTextArea(customers.get(0).truckNumber + "\n\n" +
+         * info.getText());
+         * temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
+         * temp.print();
+         * } catch (PrinterException e1) {
+         * // TODO Auto-generated catch block
+         * e1.printStackTrace();
+         * }
+         * System.out.println("test");
+         * }
+         * });
+         * 
+         */
 
         JScrollPane scroll = new JScrollPane(info);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -671,7 +717,6 @@ class AddedMissingPanel extends JPanel {
 
     public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal) {
         setLayout(new BorderLayout());
-        String output = "";
 
         Collections.sort(removedFromPre,
                 (o1, o2) -> o1.location.compareTo(o2.location));
@@ -681,33 +726,33 @@ class AddedMissingPanel extends JPanel {
                 (o1, o2) -> o1.location.compareTo(o2.location));
         Collections.sort(addedtoFinal, Collections.reverseOrder());
 
-        output += "Added to Final Manifest\n";
-        output += String.format(
-                "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10
-                        + "s",
-                "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n";
+        String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
+        int total_size = removedFromPre.size() + addedtoFinal.size() + 2;
+        String[][] data = new String[total_size + 3][column_names.length];
 
-        for (customer customer : addedtoFinal) {
-            output += customer + "\n";
-        }
-
+        data[0] = new String[] { "Added to Final Manifest", "", "", "", "", "", "" };
         if (addedtoFinal.isEmpty())
-            output += "Nothing Changed\n";
+            data[1] = new String[] { "Nothing Changed", "", "", "", "", "", "" };
 
-        output += "\nRemoved from Pre Manifest\n";
-        output += String.format(
-                "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10
-                        + "s",
-                "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n";
-        for (customer customer : removedFromPre) {
-            output += customer + "\n";
+        int offset = 1;
+        for (int c = 0; c < addedtoFinal.size(); c++) {
+            customer customer = addedtoFinal.get(c);
+            data[c + offset] = new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
+                    customer.location, "" + customer.stop };
         }
 
+        data[addedtoFinal.size() + 3] = new String[] { "Removed from Pre Manifest", "", "", "", "", "", "" };
         if (removedFromPre.isEmpty())
-            output += "Nothing Changed";
+            data[addedtoFinal.size() + 4] = new String[] { "Nothing Changed", "", "", "", "", "", "" };
 
-        JTextArea info = new JTextArea(output);
-        info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        offset = addedtoFinal.size() + 4;
+        for (int c = 0; c < removedFromPre.size(); c++) {
+            customer customer = removedFromPre.get(c);
+            data[c + offset] = new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
+                    customer.location, "" + customer.stop };
+        }
+
+        JTable info = new JTable(data, column_names);
 
         getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK),
                 "Print");
@@ -715,24 +760,72 @@ class AddedMissingPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String truckNumber = "";
-
-                    if (!removedFromPre.isEmpty())
-                        truckNumber = removedFromPre.get(0).truckNumber;
-
-                    if (!addedtoFinal.isEmpty())
-                        truckNumber = addedtoFinal.get(0).truckNumber;
-
-                    JTextArea temp = new JTextArea(truckNumber + "\n\n" + info.getText());
-                    temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
-                    temp.print();
+                    info.print();
                 } catch (PrinterException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
-                System.out.println("test");
             }
         });
+
+        /*
+         * String output = "Added to Final Manifest\n";
+         * output += String.format(
+         * "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" +
+         * -10 + "s" + "%" + -10
+         * + "s",
+         * "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n";
+         * 
+         * for (customer customer : addedtoFinal) {
+         * output += customer + "\n";
+         * }
+         * 
+         * if (addedtoFinal.isEmpty())
+         * output += "Nothing Changed\n";
+         * 
+         * output += "\nRemoved from Pre Manifest\n";
+         * output += String.format(
+         * "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" +
+         * -10 + "s" + "%" + -10
+         * + "s",
+         * "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n";
+         * for (customer customer : removedFromPre) {
+         * output += customer + "\n";
+         * }
+         * 
+         * if (removedFromPre.isEmpty())
+         * output += "Nothing Changed";
+         * 
+         * JTextArea info = new JTextArea(output);
+         * info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+         * 
+         * getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+         * KeyEvent.CTRL_DOWN_MASK),
+         * "Print");
+         * getActionMap().put("Print", new AbstractAction() {
+         * 
+         * @Override
+         * public void actionPerformed(ActionEvent e) {
+         * try {
+         * String truckNumber = "";
+         * 
+         * if (!removedFromPre.isEmpty())
+         * truckNumber = removedFromPre.get(0).truckNumber;
+         * 
+         * if (!addedtoFinal.isEmpty())
+         * truckNumber = addedtoFinal.get(0).truckNumber;
+         * 
+         * JTextArea temp = new JTextArea(truckNumber + "\n\n" + info.getText());
+         * temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
+         * temp.print();
+         * } catch (PrinterException e1) {
+         * // TODO Auto-generated catch block
+         * e1.printStackTrace();
+         * }
+         * System.out.println("test");
+         * }
+         * });
+         */
 
         JScrollPane scroll = new JScrollPane(info);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -759,9 +852,10 @@ class JTabbedPaneWithCloseButton {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         titlePanel.setOpaque(false);
         JLabel titleLbl = new JLabel(title);
-        titleLbl.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
         titlePanel.add(titleLbl);
-        JButton closeButton = new JButton("x");
+        JButton closeButton = new JButton("❌");
+        closeButton.setContentAreaFilled(false);
+        closeButton.setBorderPainted(false);
 
         closeButton.addMouseListener(new MouseAdapter() {
             @Override

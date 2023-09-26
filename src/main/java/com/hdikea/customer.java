@@ -35,6 +35,13 @@ public class customer implements Comparable<customer> {
         return false;
     }
 
+    public boolean isXChange() {
+        if (header.contains("EXC"))
+            return true;
+
+        return false;
+    }
+
     public String toString() {
         return String.format("%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s" + "%" + -10 + "s", header, orderNumber, name, carts, location, stop);
 
