@@ -106,6 +106,10 @@ public class compareToLog {
 
         for (customer customer : allCustomers) {
 
+            if(customer.isRemoval()){
+                customer.location = "Removal";
+            }
+
             if (customer.isReturn() && !customer.isXChange())
                 customer.location = "Return";
 

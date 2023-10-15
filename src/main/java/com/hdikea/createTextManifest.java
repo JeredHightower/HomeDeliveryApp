@@ -56,7 +56,7 @@ public class createTextManifest {
                     getName = true;
                 }
             } else if (getOrderNumber) {
-                Pattern p = Pattern.compile("((?:LCD|CCD).*?)(\\d{9})");
+                Pattern p = Pattern.compile("((?:LCD|CCD|LNK).*?)(\\d{9})");
                 Matcher m = p.matcher(currentLine);
 
                 if (m.find()) {

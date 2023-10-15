@@ -368,10 +368,13 @@ class TwoPanel extends JPanel {
                 ArrayList<customer> allFinalCustomers = c.getAllInformationOneList(finalManifest);
 
                 /// ADD COMPARE TO LOG TO GET LOCATIONS
+                ArrayList<customer> logCustomers = null;
+                ArrayList<customer> logCustCopy = null;
                 if (!logLoc.getText().isEmpty()) {
-                    ArrayList<customer> logCustomers = c.customersFromLog(logSourceDir);
+                    logCustomers = c.customersFromLog(logSourceDir);
+                    logCustCopy = new ArrayList<>(logCustomers);
                     c.crossReferenceAll(allPreCustomers, logCustomers);
-                    c.crossReferenceAll(allFinalCustomers, logCustomers);
+                    c.crossReferenceAll(allFinalCustomers, logCustCopy);
                 }
                 ///////////////////
 
@@ -390,20 +393,31 @@ class TwoPanel extends JPanel {
                         ArrayList<customer> removedFromPre = intersection(first, second);
                         ArrayList<customer> addedtoFinal = intersection(second, first);
 
-                        TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(removedFromPre, addedtoFinal));
+                        if (logCustCopy != null)
+                            logCustCopy = intersection(logCustCopy, removedFromPre);
+
+                        ArrayList<customer> stillMissing = new ArrayList<>();
+                        if (!logLoc.getText().isEmpty()) {
+                            stillMissing = new ArrayList<>(second);
+                            stillMissing.removeIf(cust -> !cust.location.equals("Missing"));
+                            stillMissing = intersection(stillMissing, addedtoFinal);
+                        }
+
+                        TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing));
                     }
                 }
 
                 //////////
-                LogPanel lp = new LogPanel();
-                ArrayList<customer> extraOrders = lp.getExtraOrders(allFinalCustomers, logSourceDir);
-                if (extraOrders == null) {
-                    System.out.println("Error, empty lists");
-                    TabbedPane.add("Error", new errorPanel());
-                    return;
-                }
+                if (!logLoc.getText().isEmpty()) {
 
-                TabbedPane.add("Orders not On Final", new ManifestPanel(extraOrders, true, true));
+                    if (logCustCopy == null) {
+                        System.out.println("Error, empty lists");
+                        TabbedPane.add("Error", new errorPanel());
+                        return;
+                    }
+
+                    TabbedPane.add("Not On Pre or Final", new ManifestPanel(logCustCopy, true, true));
+                }
                 /////////
             }
         });
@@ -550,6 +564,7 @@ class TwoPanelManual extends JPanel {
                 ArrayList<customer> first = c.relevantText(preManifest);
                 ArrayList<customer> second = c.relevantText(finalManifest);
 
+
                 if (first == null || second == null) {
                     System.out.println("Error, empty lists");
                     JPanel err = new errorPanel();
@@ -563,14 +578,22 @@ class TwoPanelManual extends JPanel {
 
                 if (!logLoc.getText().isEmpty()) {
                     ArrayList<customer> logCustomers = cLog.customersFromLog(logSourceDir);
+                    ArrayList<customer> logCustCopy = new ArrayList<>(logCustomers);
                     cLog.crossReferenceAll(first, logCustomers);
-                    cLog.crossReferenceAll(second, logCustomers);
+                    cLog.crossReferenceAll(second, logCustCopy);
                 }
 
                 ArrayList<customer> removedFromPre = intersection(first, second);
                 ArrayList<customer> addedtoFinal = intersection(second, first);
 
-                JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal);
+                ArrayList<customer> stillMissing = new ArrayList<>();
+                if (!logLoc.getText().isEmpty()) {
+                    stillMissing = new ArrayList<>(second);
+                    stillMissing.removeIf(cust -> !cust.location.equals("Missing"));
+                    stillMissing = intersection(stillMissing, addedtoFinal);
+                }
+
+                JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing);
                 TabbedPane.add(second.get(0).truckNumber, panel);
 
                 TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(panel),
@@ -723,7 +746,8 @@ class ManifestPanel extends JPanel {
 
 class AddedMissingPanel extends JPanel {
 
-    public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal) {
+    public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal,
+            ArrayList<customer> stillMissing) {
         setLayout(new BorderLayout());
 
         Collections.sort(removedFromPre,
@@ -735,8 +759,8 @@ class AddedMissingPanel extends JPanel {
         Collections.sort(addedtoFinal, Collections.reverseOrder());
 
         String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
-        int total_size = removedFromPre.size() + addedtoFinal.size() + 2;
-        String[][] data = new String[total_size + 4][column_names.length];
+        int total_size = removedFromPre.size() + addedtoFinal.size() + stillMissing.size();
+        String[][] data = new String[total_size + 6 + 3][column_names.length];
 
         data[0] = new String[] { "Added to Final Manifest", "", "", "", "", "", "" };
         if (addedtoFinal.isEmpty())
@@ -756,6 +780,20 @@ class AddedMissingPanel extends JPanel {
         offset = addedtoFinal.size() + 4;
         for (int c = 0; c < removedFromPre.size(); c++) {
             customer customer = removedFromPre.get(c);
+            data[c + offset] = new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
+                    customer.location, "" + customer.stop };
+        }
+
+        /////////
+        data[addedtoFinal.size() + 3 + removedFromPre.size() + 3] = new String[] { "Still Missing From Pre Manifest", "", "", "", "", "",
+                "" };
+        if (stillMissing.isEmpty())
+            data[addedtoFinal.size() + 3 + removedFromPre.size() + 4] = new String[] { "Nothing Changed", "", "", "",
+                    "", "", "" };
+
+        offset = addedtoFinal.size() + 3 + removedFromPre.size() + 4;
+        for (int c = 0; c < stillMissing.size(); c++) {
+            customer customer = stillMissing.get(c);
             data[c + offset] = new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
                     customer.location, "" + customer.stop };
         }
@@ -794,7 +832,7 @@ class AddedMissingPanel extends JPanel {
 
         add(scroll);
 
-        float[]columnWidthPercentage = new float[] { .33f, .175f, .25f, .06f, .125f, .06f };
+        float[] columnWidthPercentage = new float[] { .33f, .175f, .25f, .06f, .125f, .06f };
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
