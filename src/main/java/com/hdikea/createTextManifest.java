@@ -17,12 +17,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class createTextManifest {
-
+    
+    /*
+     * Calls getText using a filepath pointing to a pdf and uses regex to extract relevant information for manifest
+     * returns a list of customers objects
+     * Returns null if no text is returned from getText
+     */
     public ArrayList<customer> relevantText(String sourceDir) {
 
         Scanner relText = new Scanner(getText(sourceDir));
 
-        if(!relText.hasNextLine()){
+        if (!relText.hasNextLine()) {
             System.out.println("Error, nothing found");
             return null;
         }
@@ -83,6 +88,10 @@ public class createTextManifest {
         return customers;
     }
 
+    /*
+     * Takes a filepath pointing to a pdf and calls convertManifest to change it into a png
+     * Then using Tesseract OCR, converts the png to text and returns all text as a single string
+     */
     private String getText(String sourceDir) {
         pdf2image p = new pdf2image();
         ArrayList<File> createdFiles = p.convertManifest(sourceDir);
@@ -90,11 +99,10 @@ public class createTextManifest {
         BytePointer outText;
 
         TessBaseAPI api = new TessBaseAPI();
-        // Initialize tesseract-ocr with English, without specifying tessdata path
-        
-        InputStream inputStream = this.getClass().getClassLoader()
-        .getResourceAsStream("eng.traineddata");
-		File somethingFile;
+
+        // Initialize tesseract-ocr with English by creating a temp file
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("eng.traineddata");
+        File somethingFile;
         try {
             somethingFile = File.createTempFile("eng", ".traineddata");
             FileUtils.copyInputStreamToFile(inputStream, somethingFile);
@@ -105,18 +113,11 @@ public class createTextManifest {
             e.printStackTrace();
         }
 
-		if (api.Init(somethingFile.getParent(),
-				FilenameUtils.getBaseName(somethingFile.getName())) != 0) {
-			System.err.println("Could not initialize tesseract.");
-            System.exit(1);
-		}
-            
-        /*
-        if (api.Init("language", "eng") != 0) {
+        if (api.Init(somethingFile.getParent(),
+                FilenameUtils.getBaseName(somethingFile.getName())) != 0) {
             System.err.println("Could not initialize tesseract.");
             System.exit(1);
         }
-        */
 
         String allText = "";
         File dir = new File(System.getProperty("user.dir"));
@@ -132,7 +133,6 @@ public class createTextManifest {
                 outText = api.GetUTF8Text();
                 String newText = outText.getString();
 
-                // System.out.println("OCR output:\n" + newText);
                 allText += newText;
 
                 pixDestroy(image);

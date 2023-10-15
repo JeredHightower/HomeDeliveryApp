@@ -13,6 +13,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class compareToLog {
 
+    /*
+     * Takes a list of customers
+     * Returns a hashmap with each key as a truck number and its contents being the list of customers for that truck
+     */
     public HashMap<String, ArrayList<customer>> getTrucks(ArrayList<customer> allCustomers) {
         HashMap<String, ArrayList<customer>> trucks = new HashMap<String, ArrayList<customer>>();
 
@@ -29,6 +33,11 @@ public class compareToLog {
         return trucks;
     }
 
+
+    /*
+     * Takes a filepath to an excel file and converts excel rows into customer objects
+     * Returns a list of customers
+     */
     public ArrayList<customer> customersFromLog(String logSourceDir) {
         ArrayList<customer> customers = new ArrayList<customer>();
 
@@ -50,7 +59,7 @@ public class compareToLog {
                 return null;
             }
             else{
-            // Skip title line
+            // Skip title line (Sheet name)
             System.out.println(sc.nextLine());
             }
 
@@ -58,10 +67,11 @@ public class compareToLog {
                 xlsx.close();
                 sc.close();
                 return null;
-            }{
-            // Skip first line
-            System.out.println(sc.nextLine());
             }
+
+            // Skip first line (Column names)
+            System.out.println(sc.nextLine());
+            
 
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
@@ -97,7 +107,13 @@ public class compareToLog {
         return null;
     }
 
-    // Must call to change lists (add locations)
+
+    /*
+     * Adds locations to allCustomers using information from customersFromLog
+     * Each time a location is added, that entry is removed from customersFromLog
+     * Both lists are changed by this
+     * Returns the updated customersFromLog
+     */
     public ArrayList<customer> crossReferenceAll(ArrayList<customer> allCustomers,
             ArrayList<customer> customersFromLog) {
 
@@ -135,7 +151,11 @@ public class compareToLog {
         return customersFromLog;
     }
 
-    /// Searches directories and processes all manifests
+    /*
+     * Takes a directory and extracts all customer information from all pdf files within the directory
+     * Returns a list of all customers found from all manifests
+     * Returns null if a pdf file is invalid
+     */
     public ArrayList<customer> getAllInformationOneList(String sourceDir) {
         ArrayList<customer> allCustomers = new ArrayList<customer>();
 
@@ -143,15 +163,13 @@ public class compareToLog {
         for (File file : dir.listFiles())
             if (!file.isDirectory() && file.getName().endsWith("pdf")) {
 
-                /// Make this a thread
                 createTextManifest c = new createTextManifest();
+
                 ArrayList<customer> customers = c.relevantText(file.getPath());
-                
                 if(customers == null)
                     return null;
-
-                allCustomers.addAll(customers);
-                // Make this a thread
+                else
+                    allCustomers.addAll(customers);
             }
 
         return allCustomers;

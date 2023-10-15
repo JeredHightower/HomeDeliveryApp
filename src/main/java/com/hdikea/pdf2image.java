@@ -11,28 +11,33 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 
 public class pdf2image {
 
+    /*
+     * Takes a pdf file and makes a new copy of each page as a png
+     * Returns a list of the files it created
+     * Returns null if it failed or ran into an error
+     */
     public ArrayList<File> convertManifest(String sourceDir) {
         try {
             File sourceFile = new File(sourceDir);
             ArrayList<File> createdFiles = new ArrayList<>();
 
+            // Check that file exists and is a PDF file
             if (sourceFile.exists() && sourceFile.getName().endsWith("pdf")) {
                 PDDocument document = PDDocument.load(sourceFile);
-                
-                // System.out.println("Total files to be converted -> " + (document.getNumberOfPages() - 1));
-
                 PDFRenderer pdfRenderer = new PDFRenderer(document);
 
+                
+                // Page Limit
                 int max_pages = 6;
                 if(document.getNumberOfPages() < max_pages){
                     max_pages = document.getNumberOfPages();
                 }
+
+                // Skips first page (not useful for manifest)
                 for (int pageCounter = 1; pageCounter < max_pages; pageCounter++) {
 
-                    // note that the page number parameter is zero based
                     BufferedImage bim = pdfRenderer.renderImageWithDPI(pageCounter, 300, ImageType.RGB);
 
-                    // suffix in filename will be used as the file format
                     ImageIOUtil.writeImage(bim, sourceFile.getName() + "-" + (pageCounter) + ".png", 300);
                     File img = new File(sourceFile.getName() + "-" + (pageCounter) + ".png");
                     createdFiles.add(img);
@@ -52,6 +57,7 @@ public class pdf2image {
         }
     }
 
+    // deletes files created by convertManifest
     public void deleteTempFiles(ArrayList<File> files) {
         if(files == null)
             return;
