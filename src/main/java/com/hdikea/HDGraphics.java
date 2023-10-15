@@ -6,11 +6,14 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.print.PrinterException;
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,7 +33,9 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.JTable.PrintMode;
 import javax.swing.border.LineBorder;
+import javax.swing.table.TableColumnModel;
 
 public class HDGraphics extends JFrame {
 
@@ -39,7 +44,7 @@ public class HDGraphics extends JFrame {
     public HDGraphics(String title) {
         super(title);
         // Sample 01: Set Size and Position
-        setBounds(100, 100, 1280, 720);
+        setBounds(100, 100, 900, 700);
 
         TabbedPane.addTab("Compare Manifests To Log", new LogPanel());
         TabbedPane.addTab("Compare Manifests (Auto)", new TwoPanel());
@@ -388,6 +393,18 @@ class TwoPanel extends JPanel {
                         TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(removedFromPre, addedtoFinal));
                     }
                 }
+
+                //////////
+                LogPanel lp = new LogPanel();
+                ArrayList<customer> extraOrders = lp.getExtraOrders(allFinalCustomers, logSourceDir);
+                if (extraOrders == null) {
+                    System.out.println("Error, empty lists");
+                    TabbedPane.add("Error", new errorPanel());
+                    return;
+                }
+
+                TabbedPane.add("Orders not On Final", new ManifestPanel(extraOrders, true, true));
+                /////////
             }
         });
 
@@ -583,12 +600,12 @@ class ManifestPanel extends JPanel {
 
     public ManifestPanel(ArrayList<customer> customers, boolean reverse, boolean extra) {
         setLayout(new BorderLayout());
+        float[] columnWidthPercentage;
 
         // Remove empty elements from log list
         if (reverse && extra)
             customers.removeIf(c -> c.orderNumber.isEmpty());
-        
-        
+
         /// false, false: View Manifest | true, true: Extra Orders | true, false:
         /// ComparingtoLog
         /////////
@@ -623,29 +640,40 @@ class ManifestPanel extends JPanel {
         }
 
         JTable info = new JTable(data, column_names);
+        // info.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         JTable printTable = new JTable();
         printTable.setModel(info.getModel());
 
         if (extra) {
             // { customer.orderNumber, customer.name, customer.carts, customer.location };
-            // printTable.getColumnModel().getColumn(0).setWidth(200);
+            // printTable.getColumnModel().getColumn(0).setWidth(100);
             printTable.getColumnModel().getColumn(1).setWidth(150);
             printTable.getColumnModel().getColumn(2).setWidth(35);
             printTable.getColumnModel().getColumn(3).setWidth(75);
+
+            columnWidthPercentage = new float[] { .175f * (1.0f / .61f), .25f * (1.0f / .61f), .06f * (1.0f / .61f),
+                    .125f * (1.0f / .61f) };
         } else if (!reverse) {
             // { customer.header, customer.orderNumber, customer.name, "" + customer.stop };
             printTable.getColumnModel().getColumn(0).setWidth(200);
             // printTable.getColumnModel().getColumn(1).setWidth(200);
             printTable.getColumnModel().getColumn(2).setWidth(150);
             printTable.getColumnModel().getColumn(3).setWidth(35);
+
+            columnWidthPercentage = new float[] { .33f * (1.0f / .815f), .175f * (1.0f / .815f), .25f * (1.0f / .815f),
+                    .06f * (1.0f / .815f) };
         } else {
+            // {.33f, .175f, .25f, .06f, .125f, .06f}
+            // Header, Order Number, Name, Carts, Location, Stop
             printTable.getColumnModel().getColumn(0).setWidth(200);
-            // printTable.getColumnModel().getColumn(1).setWidth(200);
+            // printTable.getColumnModel().getColumn(1).setWidth(105);
             printTable.getColumnModel().getColumn(2).setWidth(150);
             printTable.getColumnModel().getColumn(3).setWidth(35);
             printTable.getColumnModel().getColumn(4).setWidth(75);
             printTable.getColumnModel().getColumn(5).setWidth(35);
+
+            columnWidthPercentage = new float[] { .33f, .175f, .25f, .06f, .125f, .06f };
         }
 
         printTable.setSize(printTable.getPreferredSize());
@@ -657,7 +685,13 @@ class ManifestPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    printTable.print();
+                    MessageFormat header = new MessageFormat("");
+                    if (extra)
+                        header = new MessageFormat("Extra Orders");
+                    else
+                        header = new MessageFormat(customers.get(0).truckNumber);
+
+                    printTable.print(PrintMode.FIT_WIDTH, header, null);
                 } catch (PrinterException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -665,78 +699,26 @@ class ManifestPanel extends JPanel {
             }
         });
 
-        /*
-         * String output = String.format(
-         * "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" +
-         * -10 + "s" + "%" + -10
-         * + "s",
-         * "Header", "Order Number", "Name", "Carts", "Location", "Stop") + "\n\n";
-         * 
-         * if (extra) {
-         * output = String.format(
-         * "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" + "%" + -10 + "s",
-         * "Order Number", "Name", "Carts", "Location") + "\n\n";
-         * }
-         * 
-         * // HEY THIS IS VERY IMPORTANT RIGHT HERE
-         * if (reverse) {
-         * Collections.sort(customers,
-         * (o1, o2) -> o1.location.compareTo(o2.location));
-         * Collections.sort(customers, Collections.reverseOrder());
-         * } else {
-         * output = String.format(
-         * "%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s",
-         * "Header", "Order Number", "Name", "Stop") + "\n";
-         * }
-         * ///////////////////
-         * 
-         * for (customer customer : customers) {
-         * 
-         * if (extra)
-         * output += String.format("%" + -20 + "s" + "%" + -20 + "s" + "%" + -10 + "s" +
-         * "%" + -10 + "s" + "\n",
-         * customer.orderNumber, customer.name, customer.carts, customer.location);
-         * else if (reverse)
-         * output += customer + "\n";
-         * else
-         * output += String.format("%" + -30 + "s" + "%" + -20 + "s" + "%" + -20 + "s" +
-         * "%" + -10 + "s",
-         * customer.header, customer.orderNumber, customer.name, customer.stop) + "\n";
-         * }
-         * 
-         * output += "\n";
-         * 
-         * JTextArea info = new JTextArea(output);
-         * info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-         * 
-         * getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,
-         * KeyEvent.CTRL_DOWN_MASK),
-         * "Print");
-         * getActionMap().put("Print", new AbstractAction() {
-         * 
-         * @Override
-         * public void actionPerformed(ActionEvent e) {
-         * try {
-         * JTextArea temp = new JTextArea(customers.get(0).truckNumber + "\n\n" +
-         * info.getText());
-         * temp.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
-         * temp.print();
-         * } catch (PrinterException e1) {
-         * // TODO Auto-generated catch block
-         * e1.printStackTrace();
-         * }
-         * System.out.println("test");
-         * }
-         * });
-         * 
-         */
-
         JScrollPane scroll = new JScrollPane(info);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         add(scroll);
-    }
 
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int tw = info.getColumnModel().getTotalColumnWidth();
+
+                TableColumnModel jTableColumnModel = info.getColumnModel();
+                int cantCols = jTableColumnModel.getColumnCount();
+                for (int i = 0; i < cantCols; i++) {
+                    int pWidth = Math.round(columnWidthPercentage[i] * tw);
+                    jTableColumnModel.getColumn(i).setPreferredWidth(pWidth);
+                }
+            }
+        });
+
+    }
 }
 
 class AddedMissingPanel extends JPanel {
@@ -811,6 +793,21 @@ class AddedMissingPanel extends JPanel {
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         add(scroll);
+
+        float[]columnWidthPercentage = new float[] { .33f, .175f, .25f, .06f, .125f, .06f };
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int tw = info.getColumnModel().getTotalColumnWidth();
+
+                TableColumnModel jTableColumnModel = info.getColumnModel();
+                int cantCols = jTableColumnModel.getColumnCount();
+                for (int i = 0; i < cantCols; i++) {
+                    int pWidth = Math.round(columnWidthPercentage[i] * tw);
+                    jTableColumnModel.getColumn(i).setPreferredWidth(pWidth);
+                }
+            }
+        });
     }
 }
 
