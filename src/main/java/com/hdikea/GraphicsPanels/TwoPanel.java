@@ -22,6 +22,9 @@ import javax.swing.border.LineBorder;
 import com.hdikea.compareToLog;
 import com.hdikea.customer;
 
+/*
+ * Panel Intended to for the Compare Manifests (Auto) Screen
+ */
 public class TwoPanel extends JPanel {
 
     JPanel buttons = new JPanel();
@@ -52,14 +55,12 @@ public class TwoPanel extends JPanel {
 
         JButton generate = new JButton("Generate");
 
-        /// NEWLY ADDED
         JButton BtnLog = new JButton("Select Log (.xlsx)");
         JTextField logLoc = new JTextField("", 40);
         logLoc.setEditable(false);
         logLoc.setMaximumSize(logLoc.getPreferredSize());
         tab3.add(BtnLog);
         tab3.add(logLoc);
-        ///////////////////
 
         tab1.setBackground(new Color(255, 255, 153));
         tab2.setBackground(new Color(255, 255, 153));
@@ -143,31 +144,50 @@ public class TwoPanel extends JPanel {
 
                 compareToLog c = new compareToLog();
 
-                ArrayList<customer> allPreCustomers = c.getAllInformationOneList(preManifest);
-                ArrayList<customer> allFinalCustomers = c.getAllInformationOneList(finalManifest);
+                // Remove Current Tabs
+                TabbedPane.removeAll();
 
                 /// ADD COMPARE TO LOG TO GET LOCATIONS
                 ArrayList<customer> logCustomers = null;
                 ArrayList<customer> logCustCopy = null;
                 if (!logLoc.getText().isEmpty()) {
                     logCustomers = c.customersFromLog(logSourceDir);
-                    logCustCopy = new ArrayList<>(logCustomers);
+                    
+                    if(logCustomers != null)
+                        logCustCopy = new ArrayList<>(logCustomers);
+
+                    if (logCustomers == null) {
+                        TabbedPane.add("Error", new errorPanel("Error: Issue with Log"));
+                        logLoc.setText("");
+                        return;
+                    }
+                }
+                ///////////////////
+
+                ArrayList<customer> allPreCustomers = c.getAllInformationOneList(preManifest);
+                ArrayList<customer> allFinalCustomers = c.getAllInformationOneList(finalManifest);
+
+                if (allPreCustomers == null | allFinalCustomers == null) {
+                    TabbedPane.add("Error", new errorPanel("Error: Issue Getting Manifest Information"));
+                    return;
+                }
+
+                // ADD COMPARE TO LOG TO GET LOCATIONS
+                if (!logLoc.getText().isEmpty()) {
                     c.crossReferenceAll(allPreCustomers, logCustomers);
                     c.crossReferenceAll(allFinalCustomers, logCustCopy);
                 }
-                ///////////////////
+                ///////////////
 
                 HashMap<String, ArrayList<customer>> pretrucks = c.getTrucks(allPreCustomers);
                 HashMap<String, ArrayList<customer>> finaltrucks = c.getTrucks(allFinalCustomers);
 
-                TabbedPane.removeAll();
                 for (String truckNumber : finaltrucks.keySet()) {
                     ArrayList<customer> first = pretrucks.get(truckNumber);
                     ArrayList<customer> second = finaltrucks.get(truckNumber);
 
                     if (first == null || second == null) {
-                        System.out.println("Error, empty lists");
-                        TabbedPane.add("Error", new errorPanel());
+                        TabbedPane.add("Error", new errorPanel("Error: Mismatched Truck Number, Please use Manual Screen"));
                     } else {
                         ArrayList<customer> removedFromPre = intersection(first, second);
                         ArrayList<customer> addedtoFinal = intersection(second, first);
@@ -182,22 +202,19 @@ public class TwoPanel extends JPanel {
                             stillMissing = intersection(stillMissing, addedtoFinal);
                         }
 
-                        TabbedPane.add(first.get(0).truckNumber, new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing));
+                        TabbedPane.add(first.get(0).truckNumber,
+                                new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing));
                     }
                 }
 
                 //////////
-                if (!logLoc.getText().isEmpty()) {
-
-                    if (logCustCopy == null) {
-                        System.out.println("Error, empty lists");
-                        TabbedPane.add("Error", new errorPanel());
-                        return;
-                    }
-
+                if (!logLoc.getText().isEmpty())
                     TabbedPane.add("Not On Pre or Final", new ManifestPanel(logCustCopy, true, true));
-                }
                 /////////
+
+                if (TabbedPane.getTabCount() <= 0) {
+                    TabbedPane.add("Error", new errorPanel("Error: Unknown Error"));
+                }
             }
         });
 

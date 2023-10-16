@@ -12,12 +12,13 @@ import javax.swing.JTextArea;
  */
 public class errorPanel extends JPanel {
 
-    public errorPanel() {
+    public errorPanel(String message) {
         setLayout(new BorderLayout());
-        String output = "An error occured";
 
-        JTextArea info = new JTextArea(output);
+        JTextArea info = new JTextArea(message);
         info.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+        System.out.println("errorPanel: " + message);
 
         add(info);
     }

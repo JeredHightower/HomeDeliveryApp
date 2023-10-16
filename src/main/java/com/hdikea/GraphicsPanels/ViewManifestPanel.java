@@ -21,6 +21,9 @@ import javax.swing.border.LineBorder;
 import com.hdikea.compareToLog;
 import com.hdikea.customer;
 
+/*
+ * Panel for just viewing the manifests as they are
+ */
 public class ViewManifestPanel extends JPanel {
     JTabbedPane TabbedPane = new JTabbedPane();
     JPanel buttons = new JPanel(new FlowLayout());
@@ -81,16 +84,18 @@ public class ViewManifestPanel extends JPanel {
                 ArrayList<customer> allCustomers = c.getAllInformationOneList(sourceDir);
                 HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
 
+                TabbedPane.removeAll();
                 if (allCustomers == null | trucks == null) {
-                    System.out.println("Error, empty lists");
-                    TabbedPane.removeAll();
-                    TabbedPane.add("Error", new errorPanel());
+                    TabbedPane.add("Error", new errorPanel("Error: Issue Getting Manifest Information"));
                     return;
                 }
 
-                TabbedPane.removeAll();
                 for (String truckNumber : trucks.keySet()) {
                     TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber), false, false));
+                }
+
+                if(TabbedPane.getTabCount() <= 0){
+                    TabbedPane.add("Error", new errorPanel("Error: Unknown Error"));
                 }
             }
         });

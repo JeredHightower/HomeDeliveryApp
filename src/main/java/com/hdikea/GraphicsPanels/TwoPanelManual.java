@@ -22,6 +22,9 @@ import com.hdikea.compareToLog;
 import com.hdikea.createTextManifest;
 import com.hdikea.customer;
 
+/*
+ * Panel Intended to for the Compare Manifests (Manual) Screen
+ */
 public class TwoPanelManual extends JPanel {
 
     JPanel buttons = new JPanel();
@@ -142,28 +145,46 @@ public class TwoPanelManual extends JPanel {
                 if (preManifest.isEmpty() || finalManifest.isEmpty())
                     return;
 
+                compareToLog cLog = new compareToLog();
+
+                //////
+                ArrayList<customer> logCustomers = null;
+                ArrayList<customer> logCustCopy = null;
+                if (!logLoc.getText().isEmpty()) {
+                    logCustomers = cLog.customersFromLog(logSourceDir);
+
+                    if (logCustomers != null)
+                        logCustCopy = new ArrayList<>(logCustomers);
+
+                    if (logCustomers == null) {
+                        JPanel err = new errorPanel("Error: Issue with Log");
+                        TabbedPane.add("Error", err);
+                        TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(err),
+                                close.getTitlePanel(TabbedPane, err, "Error"));
+                        logLoc.setText("");
+                        return;
+                    }
+                }
+                /////
+
                 createTextManifest c = new createTextManifest();
                 ArrayList<customer> first = c.relevantText(preManifest);
                 ArrayList<customer> second = c.relevantText(finalManifest);
 
-
                 if (first == null || second == null) {
-                    System.out.println("Error, empty lists");
-                    JPanel err = new errorPanel();
+                    JPanel err = new errorPanel("Error: Issue Getting Manifest Information");
                     TabbedPane.add("Error", err);
                     TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(err),
                             close.getTitlePanel(TabbedPane, err, "Error"));
                     return;
                 }
 
-                compareToLog cLog = new compareToLog();
-
+                ////////
                 if (!logLoc.getText().isEmpty()) {
-                    ArrayList<customer> logCustomers = cLog.customersFromLog(logSourceDir);
-                    ArrayList<customer> logCustCopy = new ArrayList<>(logCustomers);
                     cLog.crossReferenceAll(first, logCustomers);
                     cLog.crossReferenceAll(second, logCustCopy);
                 }
+                ////////
 
                 ArrayList<customer> removedFromPre = intersection(first, second);
                 ArrayList<customer> addedtoFinal = intersection(second, first);
@@ -180,6 +201,13 @@ public class TwoPanelManual extends JPanel {
 
                 TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(panel),
                         close.getTitlePanel(TabbedPane, panel, second.get(0).truckNumber));
+
+                if (TabbedPane.getTabCount() <= 0) {
+                    JPanel err = new errorPanel("Error: Unknown Error");
+                    TabbedPane.add("Error", err);
+                    TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(err),
+                            close.getTitlePanel(TabbedPane, err, "Error"));
+                }
             }
         });
 

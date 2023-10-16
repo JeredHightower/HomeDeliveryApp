@@ -21,6 +21,9 @@ import javax.swing.border.LineBorder;
 import com.hdikea.compareToLog;
 import com.hdikea.customer;
 
+/*
+ * Panel inteded for the Compare Manifests to Log screen
+ */
 public class LogPanel extends JPanel {
 
     JTabbedPane TabbedPane = new JTabbedPane();
@@ -30,6 +33,8 @@ public class LogPanel extends JPanel {
     Preferences prefs = Preferences.userRoot().node(getClass().getName());
 
     public LogPanel() {
+
+        // UI Setup
         setLayout(new BorderLayout());
         setBackground(new Color(173, 216, 230));
         setBorder(new LineBorder(Color.BLUE));
@@ -102,33 +107,52 @@ public class LogPanel extends JPanel {
                 String sourceDir = folderLoc.getText();
                 String logSourceDir = logLoc.getText();
 
+                // Check if input is empty
                 if (sourceDir.isEmpty() || logSourceDir.isEmpty())
                     return;
 
-                compareToLog c = new compareToLog();
-                ArrayList<customer> allCustomers = c.getAllInformationOneList(sourceDir);
-                ArrayList<customer> extraOrders = getExtraOrders(allCustomers, logSourceDir);
-                HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
-
+                // Remove Current Tabs
                 TabbedPane.removeAll();
-                if (allCustomers == null | extraOrders == null | trucks == null) {
-                    System.out.println("Error, empty lists");
-                    TabbedPane.add("Error", new errorPanel());
+
+                // Get customers from Log
+                compareToLog c = new compareToLog();
+                ArrayList<customer> logCustomers= c.customersFromLog(logSourceDir);
+                if(logCustomers == null){
+                    TabbedPane.add("Error", new errorPanel("Error: Issue with log"));
                     return;
                 }
+
+                // Get customers from manifest
+                ArrayList<customer> allCustomers = c.getAllInformationOneList(sourceDir);
+                if (allCustomers == null) {
+                    TabbedPane.add("Error", new errorPanel("Error: Issue Getting Manifest Information"));
+                    return;
+                }
+                
+                // Cross reference
+                ArrayList<customer> extraOrders = getExtraOrders(allCustomers, logCustomers);
+                HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
 
                 TabbedPane.add("Extra Orders", new ManifestPanel(extraOrders, true, true));
 
                 for (String truckNumber : trucks.keySet()) {
                     TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber), true, false));
                 }
+
+                if(TabbedPane.getTabCount() <= 0){
+                    TabbedPane.add("Error", new errorPanel("Error: Unknown Error"));
+                }
             }
         });
 
     }
 
-    public ArrayList<customer> getExtraOrders(ArrayList<customer> allCustomers, String logSourceDir) {
+    /*
+     * Takes two list of customers and transfers locations from logCustomers to all Customers
+     * Returns list of customers from logCustomers that weren't in allCustomers
+     */
+    public ArrayList<customer> getExtraOrders(ArrayList<customer> allCustomers, ArrayList<customer> logCustomers) {
         compareToLog c = new compareToLog();
-        return c.crossReferenceAll(allCustomers, c.customersFromLog(logSourceDir));
+        return c.crossReferenceAll(allCustomers, logCustomers);
     }
 }
