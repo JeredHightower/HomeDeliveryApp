@@ -117,6 +117,8 @@ public class compareToLog {
     public ArrayList<customer> crossReferenceAll(ArrayList<customer> allCustomers,
             ArrayList<customer> customersFromLog) {
 
+        ArrayList<customer> exchanges = new ArrayList<>();
+
         if(allCustomers == null | customersFromLog == null)
                 return null;
 
@@ -139,12 +141,20 @@ public class compareToLog {
                     customer.location = customer2.location;
                     customer.carts = customer2.carts;
 
-                    // Assumes return will appear before order on manifest
-                    if(!(customer.isXChange() && customer.isReturn()))
+                    // Add exchanges to list to remove later
+                    if(customer.isXChange())
+                        exchanges.add(customer2);
+                    else
                         it.remove();
+
                     break;
                 }
             }
+        }
+
+        for (Iterator<customer> it = customersFromLog.iterator(); it.hasNext();){
+            if(exchanges.contains(it.next()))
+                it.remove();
         }
 
         // ORDERS NOT FOUND ON ANY MANIFEST
