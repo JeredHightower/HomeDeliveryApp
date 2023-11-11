@@ -131,12 +131,20 @@ public class compareToLog {
             if (customer.isReturn() && !customer.isXChange())
                 customer.location = "Return";
 
+            if (customer.isCCD()){
+                customer.location = "!CCD";
+            }
+
             for (Iterator<customer> it = customersFromLog.iterator(); it.hasNext();) {
                 if (customer.isReturn() && !customer.isXChange()) {
                     break;
                 }
 
                 if(customer.isRemoval()){
+                    break;
+                }
+
+                if (customer.isCCD()){
                     break;
                 }
 

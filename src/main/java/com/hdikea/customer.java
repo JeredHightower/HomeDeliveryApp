@@ -44,6 +44,13 @@ public class customer implements Comparable<customer> {
     }
     */
 
+    public boolean isCCD(){
+        if(header.contains("CCD"))
+            return true;
+        
+        return false;
+    }
+
     public boolean isXChange() {
         if (header.contains("EXC"))
             return true;
