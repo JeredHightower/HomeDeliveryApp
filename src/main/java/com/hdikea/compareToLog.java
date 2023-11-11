@@ -136,6 +136,10 @@ public class compareToLog {
                     break;
                 }
 
+                if(customer.isRemoval()){
+                    break;
+                }
+
                 customer customer2 = it.next();
                 if (customer.compareTo(customer2) == 0) {
                     customer.location = customer2.location;

@@ -48,6 +48,7 @@ public class createTextManifest {
 
         while (relText.hasNextLine()) {
             String currentLine = relText.nextLine();
+            // System.out.println(currentLine);
 
             if (getTruckNumber) {
                 Pattern p = Pattern.compile(" (\\d{4})");

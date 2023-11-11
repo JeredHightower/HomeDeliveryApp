@@ -35,6 +35,15 @@ public class customer implements Comparable<customer> {
         return false;
     }
 
+    /*
+    public boolean isReturn() {
+        if (header.contains("RTV"))
+            return true;
+
+        return false;
+    }
+    */
+
     public boolean isXChange() {
         if (header.contains("EXC"))
             return true;

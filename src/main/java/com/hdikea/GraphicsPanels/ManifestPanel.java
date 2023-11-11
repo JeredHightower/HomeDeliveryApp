@@ -29,6 +29,7 @@ public class ManifestPanel extends JPanel {
         setLayout(new BorderLayout());
         float[] columnWidthPercentage;
 
+        /// false, false: View Manifest - 0 | true, true: Extra Orders - 1 | true, false: ComparingtoLog - 2
         // Setup Column Names
         String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
         if (extra)
@@ -132,8 +133,7 @@ public class ManifestPanel extends JPanel {
         if (reverse && extra)
             customers.removeIf(c -> c.orderNumber.isEmpty());
 
-        /// false, false: View Manifest | true, true: Extra Orders | true, false:
-        /// ComparingtoLog
+        /// false, false: View Manifest - 0 | true, true: Extra Orders - 1 | true, false: ComparingtoLog - 2
         /////////
         String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
         if (extra)
