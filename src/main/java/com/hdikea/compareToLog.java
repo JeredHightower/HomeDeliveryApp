@@ -153,6 +153,12 @@ public class compareToLog {
                     customer.location = customer2.location;
                     customer.carts = customer2.carts;
 
+
+                    // Set exchanges Manager to no carts
+                    if (customer.isReturn()) {
+                        customer.carts = "";
+                    }
+
                     // Add exchanges to list to remove later
                     if(customer.isXChange())
                         exchanges.add(customer2);
