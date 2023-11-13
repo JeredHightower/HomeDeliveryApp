@@ -1,7 +1,10 @@
 package com.hdikea.GraphicsPanels;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
@@ -11,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -24,6 +28,8 @@ import com.hdikea.customer;
  * Panel that sets up table and columns widths to view data
  */
 public class ManifestPanel extends JPanel {
+
+    JPanel buttons = new JPanel(new FlowLayout());
 
     public ManifestPanel(ArrayList<customer> customers, int code, boolean reverse) {
         setLayout(new BorderLayout());
@@ -103,10 +109,84 @@ public class ManifestPanel extends JPanel {
             }
         });
 
+
+        JButton orange = new JButton("Orange");
+        buttons.add(orange);
+
+        JButton yellow = new JButton("Yellow");
+        buttons.add(yellow);
+
+        JButton green = new JButton("Green");
+        buttons.add(green);
+
+        JButton blue = new JButton("Blue");
+        buttons.add(blue);
+
+        JButton purple = new JButton("Purple");
+        buttons.add(purple);
+
+        JButton white = new JButton("White");
+        buttons.add(white);
+
+        JButton pink = new JButton("Pink");
+        buttons.add(pink);
+
+        JButton black = new JButton("Black");
+        buttons.add(black);
+
+        orange.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(254, 186, 79));
+            }
+        });
+
+        yellow.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(253, 253, 130));
+            }
+        });
+
+        green.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(190, 229, 176));
+            }
+        });
+
+        blue.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(174, 198, 230));
+            }
+        });
+
+        purple.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(177, 156, 217));
+            }
+        });
+
+        white.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(Color.WHITE);
+            }
+        });
+
+        pink.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(Color.pink);
+            }
+        });
+
+        black.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(Color.LIGHT_GRAY);
+            }
+        });
+
         JScrollPane scroll = new JScrollPane(info);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         add(scroll);
+        add(buttons, BorderLayout.PAGE_END);
 
         // Auto Adjust Column Size when Viewing
         addComponentListener(new ComponentAdapter() {
