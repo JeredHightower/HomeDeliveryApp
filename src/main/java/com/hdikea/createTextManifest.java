@@ -146,4 +146,27 @@ public class createTextManifest {
 
         return allText;
     }
+
+
+    /*
+     * Takes a directory and extracts all customer information from all pdf files within the directory
+     * Returns a list of all customers found from all manifests
+     * Returns null if a pdf file is invalid
+     */
+    public ArrayList<customer> getAllInformationOneList(String sourceDir) {
+        ArrayList<customer> allCustomers = new ArrayList<customer>();
+
+        File dir = new File(sourceDir);
+        for (File file : dir.listFiles())
+            if (!file.isDirectory() && file.getName().endsWith("pdf")) {
+
+                ArrayList<customer> customers = relevantText(file.getPath());
+                if(customers == null)
+                    return null;
+                else
+                    allCustomers.addAll(customers);
+            }
+
+        return allCustomers;
+    }
 }

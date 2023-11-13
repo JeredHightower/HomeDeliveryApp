@@ -8,7 +8,7 @@ import javax.swing.WindowConstants;
 import com.hdikea.GraphicsPanels.LogPanel;
 import com.hdikea.GraphicsPanels.TwoPanel;
 import com.hdikea.GraphicsPanels.TwoPanelManual;
-import com.hdikea.GraphicsPanels.ViewManifestPanel;
+// import com.hdikea.GraphicsPanels.ViewManifestPanel;
 
 public class HDGraphics extends JFrame {
 
@@ -29,11 +29,11 @@ public class HDGraphics extends JFrame {
         // Sample 01: Set Size and Position
         setBounds(100, 100, 900, 700);
 
-        TabbedPane.addTab("Compare Manifests To Log", new LogPanel());
+        TabbedPane.addTab("Compare Manifests To Log / View", new LogPanel());
         TabbedPane.addTab("Compare Manifests (Auto)", new TwoPanel());
         TabbedPane.addTab("Compare Manifests (Manual)", new TwoPanelManual());
         // TabbedPane.addTab("Import Data to Log", new ImportPanel());
-        TabbedPane.addTab("View Manifests", new ViewManifestPanel());
+        // TabbedPane.addTab("View Manifests", new ViewManifestPanel());
         add(TabbedPane);
     }
 }

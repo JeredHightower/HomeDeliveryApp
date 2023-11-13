@@ -12,6 +12,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -55,6 +56,9 @@ public class TwoPanelManual extends JPanel {
 
         JButton generate = new JButton("Generate");
 
+        JCheckBox check = new JCheckBox("Sort by location (reverse)");
+        check.setSelected(true);
+
         /// NEWLY ADDED
         JButton BtnLog = new JButton("Select Log (.xlsx)");
         JTextField logLoc = new JTextField("", 40);
@@ -71,6 +75,7 @@ public class TwoPanelManual extends JPanel {
         buttons.add(tab1);
         buttons.add(tab2);
         buttons.add(tab3);
+        buttons.add(check);
         buttons.add(generate);
 
         buttons.setBackground(new Color(255, 255, 153));
@@ -196,7 +201,7 @@ public class TwoPanelManual extends JPanel {
                     stillMissing = intersection(stillMissing, addedtoFinal);
                 }
 
-                JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing);
+                JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, check.isSelected());
                 TabbedPane.add(second.get(0).truckNumber, panel);
 
                 TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(panel),

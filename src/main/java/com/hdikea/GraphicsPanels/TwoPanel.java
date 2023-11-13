@@ -13,6 +13,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -20,6 +21,7 @@ import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
 import com.hdikea.compareToLog;
+import com.hdikea.createTextManifest;
 import com.hdikea.customer;
 
 /*
@@ -55,6 +57,9 @@ public class TwoPanel extends JPanel {
 
         JButton generate = new JButton("Generate");
 
+        JCheckBox check = new JCheckBox("Sort by location (reverse)");
+        check.setSelected(true);
+
         JButton BtnLog = new JButton("Select Log (.xlsx)");
         JTextField logLoc = new JTextField("", 40);
         logLoc.setEditable(false);
@@ -69,6 +74,7 @@ public class TwoPanel extends JPanel {
         buttons.add(tab1);
         buttons.add(tab2);
         buttons.add(tab3);
+        buttons.add(check);
         buttons.add(generate);
 
         buttons.setBackground(new Color(255, 255, 153));
@@ -164,8 +170,9 @@ public class TwoPanel extends JPanel {
                 }
                 ///////////////////
 
-                ArrayList<customer> allPreCustomers = c.getAllInformationOneList(preManifest);
-                ArrayList<customer> allFinalCustomers = c.getAllInformationOneList(finalManifest);
+                createTextManifest cT = new createTextManifest();
+                ArrayList<customer> allPreCustomers = cT.getAllInformationOneList(preManifest);
+                ArrayList<customer> allFinalCustomers = cT.getAllInformationOneList(finalManifest);
 
                 if (allPreCustomers == null | allFinalCustomers == null) {
                     TabbedPane.add("Error", new errorPanel("Error: Issue Getting Manifest Information"));
@@ -203,13 +210,13 @@ public class TwoPanel extends JPanel {
                         }
 
                         TabbedPane.add(first.get(0).truckNumber,
-                                new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing));
+                                new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, check.isSelected()));
                     }
                 }
 
                 //////////
                 if (!logLoc.getText().isEmpty())
-                    TabbedPane.add("Not On Pre or Final", new ManifestPanel(logCustCopy, true, true));
+                    TabbedPane.add("Not On Pre or Final", new ManifestPanel(logCustCopy, 1, check.isSelected()));
                 /////////
 
                 if (TabbedPane.getTabCount() <= 0) {

@@ -12,6 +12,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -19,6 +20,7 @@ import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
 import com.hdikea.compareToLog;
+import com.hdikea.createTextManifest;
 import com.hdikea.customer;
 
 /*
@@ -41,11 +43,14 @@ public class LogPanel extends JPanel {
 
         JButton BtnLog = new JButton("Select Log (.xlsx)");
         JTextField logLoc = new JTextField("", 40);
-        logLoc.setEditable(false);
+        // logLoc.setEditable(false);
         JButton BtnFolder = new JButton("Select Manifest Folder");
         JTextField folderLoc = new JTextField("", 40);
         folderLoc.setEditable(false);
         JButton generate = new JButton("Generate");
+
+        JCheckBox check = new JCheckBox("Sort by location (reverse)");
+        check.setSelected(true);
 
         tab1.add(BtnLog);
         tab1.add(logLoc);
@@ -57,6 +62,7 @@ public class LogPanel extends JPanel {
 
         buttons.add(tab1);
         buttons.add(tab2);
+        buttons.add(check);
         buttons.add(generate);
 
         buttons.setBackground(new Color(255, 255, 153));
@@ -107,8 +113,9 @@ public class LogPanel extends JPanel {
                 String sourceDir = folderLoc.getText();
                 String logSourceDir = logLoc.getText();
 
-                // Check if input is empty
-                if (sourceDir.isEmpty() || logSourceDir.isEmpty())
+                // Check if input is empty (If no manifest folder given, don't generate. If only manifest
+                // folder is given, apply logic for just viewing manifests without locations)
+                if (sourceDir.isEmpty())
                     return;
 
                 // Remove Current Tabs
@@ -117,26 +124,31 @@ public class LogPanel extends JPanel {
                 // Get customers from Log
                 compareToLog c = new compareToLog();
                 ArrayList<customer> logCustomers= c.customersFromLog(logSourceDir);
-                if(logCustomers == null){
+                if(logCustomers == null && !logSourceDir.isEmpty()){
                     TabbedPane.add("Error", new errorPanel("Error: Issue with log"));
                     return;
                 }
 
                 // Get customers from manifest
-                ArrayList<customer> allCustomers = c.getAllInformationOneList(sourceDir);
+                createTextManifest cT = new createTextManifest();
+                ArrayList<customer> allCustomers = cT.getAllInformationOneList(sourceDir);
                 if (allCustomers == null) {
                     TabbedPane.add("Error", new errorPanel("Error: Issue Getting Manifest Information"));
                     return;
                 }
                 
                 // Cross reference
-                ArrayList<customer> extraOrders = getExtraOrders(allCustomers, logCustomers);
+                int code = 0;
+                if(!logSourceDir.isEmpty()){
+                    ArrayList<customer> extraOrders = getExtraOrders(allCustomers, logCustomers);
+                    TabbedPane.add("Extra Orders", new ManifestPanel(extraOrders, 1, check.isSelected()));
+                    code = 2;
+                }
+
                 HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
 
-                TabbedPane.add("Extra Orders", new ManifestPanel(extraOrders, true, true));
-
                 for (String truckNumber : trucks.keySet()) {
-                    TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber), true, false));
+                    TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber), code, check.isSelected()));
                 }
 
                 if(TabbedPane.getTabCount() <= 0){

@@ -26,9 +26,10 @@ import com.hdikea.customer;
 public class AddedMissingPanel extends JPanel {
 
     public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal,
-            ArrayList<customer> stillMissing) {
+            ArrayList<customer> stillMissing, boolean reverse) {
         setLayout(new BorderLayout());
-
+        
+        if (reverse){
         Collections.sort(removedFromPre,
                 (o1, o2) -> o1.location.compareTo(o2.location));
         Collections.sort(removedFromPre, Collections.reverseOrder());
@@ -36,6 +37,7 @@ public class AddedMissingPanel extends JPanel {
         Collections.sort(addedtoFinal,
                 (o1, o2) -> o1.location.compareTo(o2.location));
         Collections.sort(addedtoFinal, Collections.reverseOrder());
+        }
 
         String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
         int total_size = removedFromPre.size() + addedtoFinal.size() + stillMissing.size();

@@ -19,6 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
 import com.hdikea.compareToLog;
+import com.hdikea.createTextManifest;
 import com.hdikea.customer;
 
 /*
@@ -80,8 +81,9 @@ public class ViewManifestPanel extends JPanel {
                 if (sourceDir.isEmpty())
                     return;
 
+                createTextManifest cT = new createTextManifest();
                 compareToLog c = new compareToLog();
-                ArrayList<customer> allCustomers = c.getAllInformationOneList(sourceDir);
+                ArrayList<customer> allCustomers = cT.getAllInformationOneList(sourceDir);
                 HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
 
                 TabbedPane.removeAll();
@@ -91,7 +93,7 @@ public class ViewManifestPanel extends JPanel {
                 }
 
                 for (String truckNumber : trucks.keySet()) {
-                    TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber), false, false));
+                    TabbedPane.add(truckNumber, new ManifestPanel(trucks.get(truckNumber), 0, false));
                 }
 
                 if(TabbedPane.getTabCount() <= 0){

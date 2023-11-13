@@ -25,20 +25,20 @@ import com.hdikea.customer;
  */
 public class ManifestPanel extends JPanel {
 
-    public ManifestPanel(ArrayList<customer> customers, boolean reverse, boolean extra) {
+    public ManifestPanel(ArrayList<customer> customers, int code, boolean reverse) {
         setLayout(new BorderLayout());
         float[] columnWidthPercentage;
 
         /// false, false: View Manifest - 0 | true, true: Extra Orders - 1 | true, false: ComparingtoLog - 2
         // Setup Column Names
         String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
-        if (extra)
+        if (code == 1)
             column_names = new String[] { "Order Number", "Name", "Carts", "Location" };
-        else if (!reverse)
+        else if (code == 0)
             column_names = new String[] { "Header", "Order Number", "Name", "Stop" };
 
         // Generate Matrix
-        String[][] data = generateTableMatrix(customers, reverse, extra);
+        String[][] data = generateTableMatrix(customers, code, reverse);
 
         // Create Table
         JTable info = new JTable(data, column_names);
@@ -48,7 +48,7 @@ public class ManifestPanel extends JPanel {
 
 
         // Setup Column Widths for Print Dialog
-        if (extra) {
+        if (code == 1) {
             // { customer.orderNumber, customer.name, customer.carts, customer.location };
             // printTable.getColumnModel().getColumn(0).setWidth(100);
             printTable.getColumnModel().getColumn(1).setWidth(150);
@@ -57,7 +57,7 @@ public class ManifestPanel extends JPanel {
 
             columnWidthPercentage = new float[] { .175f * (1.0f / .61f), .25f * (1.0f / .61f), .06f * (1.0f / .61f),
                     .125f * (1.0f / .61f) };
-        } else if (!reverse) {
+        } else if (code == 0) {
             // { customer.header, customer.orderNumber, customer.name, "" + customer.stop };
             printTable.getColumnModel().getColumn(0).setWidth(200);
             // printTable.getColumnModel().getColumn(1).setWidth(200);
@@ -90,7 +90,7 @@ public class ManifestPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 try {
                     MessageFormat header = new MessageFormat("");
-                    if (extra)
+                    if (code == 1)
                         header = new MessageFormat("Extra Orders");
                     else
                         header = new MessageFormat(customers.get(0).truckNumber);
@@ -127,18 +127,18 @@ public class ManifestPanel extends JPanel {
     /*
      * Generate matrix of customer data to be put in Jtable
      */
-    public String[][] generateTableMatrix(ArrayList<customer> customers, boolean reverse, boolean extra){
+    public String[][] generateTableMatrix(ArrayList<customer> customers, int code, boolean reverse){
 
         // Remove empty elements from log list
-        if (reverse && extra)
+        if (code == 1)
             customers.removeIf(c -> c.orderNumber.isEmpty());
 
         /// false, false: View Manifest - 0 | true, true: Extra Orders - 1 | true, false: ComparingtoLog - 2
         /////////
         String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
-        if (extra)
+        if (code == 1)
             column_names = new String[] { "Order Number", "Name", "Carts", "Location" };
-        else if (!reverse)
+        else if (code == 0)
             column_names = new String[] { "Header", "Order Number", "Name", "Stop" };
 
         String[][] data = new String[customers.size() + 1][column_names.length];
@@ -157,9 +157,9 @@ public class ManifestPanel extends JPanel {
 
             String[] item = { customer.header, customer.orderNumber, customer.name, customer.carts, customer.location,
                     "" + customer.stop };
-            if (extra)
+            if (code == 1)
                 item = new String[] { customer.orderNumber, customer.name, customer.carts, customer.location };
-            else if (!reverse)
+            else if (code == 0)
                 item = new String[] { customer.header, customer.orderNumber, customer.name, "" + customer.stop };
 
             data[i] = item;
