@@ -1,7 +1,10 @@
 package com.hdikea.GraphicsPanels;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
@@ -10,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -24,6 +28,8 @@ import com.hdikea.customer;
  * still missing orders
  */
 public class AddedMissingPanel extends JPanel {
+
+    JPanel buttons = new JPanel(new FlowLayout());
 
     public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal,
             ArrayList<customer> stillMissing, boolean reverse) {
@@ -108,10 +114,91 @@ public class AddedMissingPanel extends JPanel {
             }
         });
 
+        JButton orange = new JButton("Orange");
+        orange.setBackground(new Color(254, 186, 79));;
+        buttons.add(orange);
+
+        JButton yellow = new JButton("Yellow");
+        yellow.setBackground(new Color(253, 253, 130));
+        buttons.add(yellow);
+
+        JButton green = new JButton("Green");
+        green.setBackground(new Color(190, 229, 176));
+        buttons.add(green);
+
+        JButton blue = new JButton("Blue");
+        blue.setBackground(new Color(174, 198, 230));
+        buttons.add(blue);
+
+        JButton purple = new JButton("Purple");
+        purple.setBackground(new Color(177, 156, 217));
+        buttons.add(purple);
+
+        JButton white = new JButton("White");
+        white.setBackground(Color.WHITE);
+        buttons.add(white);
+
+        JButton pink = new JButton("Pink");
+        pink.setBackground(Color.PINK);
+        buttons.add(pink);
+
+        JButton black = new JButton("Black");
+        black.setBackground(Color.LIGHT_GRAY);
+        buttons.add(black);
+
+        orange.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(254, 186, 79));
+            }
+        });
+
+        yellow.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(253, 253, 130));
+            }
+        });
+
+        green.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(190, 229, 176));
+            }
+        });
+
+        blue.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(174, 198, 230));
+            }
+        });
+
+        purple.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(new Color(177, 156, 217));
+            }
+        });
+
+        white.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(Color.WHITE);
+            }
+        });
+
+        pink.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(Color.pink);
+            }
+        });
+
+        black.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                info.setBackground(Color.LIGHT_GRAY);
+            }
+        });
+
         JScrollPane scroll = new JScrollPane(info);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         add(scroll);
+        add(buttons, BorderLayout.PAGE_END);
 
         float[] columnWidthPercentage = new float[] { .33f, .175f, .25f, .06f, .125f, .06f };
         addComponentListener(new ComponentAdapter() {

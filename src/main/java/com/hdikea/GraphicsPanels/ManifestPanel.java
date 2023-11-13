@@ -111,27 +111,35 @@ public class ManifestPanel extends JPanel {
 
 
         JButton orange = new JButton("Orange");
+        orange.setBackground(new Color(254, 186, 79));;
         buttons.add(orange);
 
         JButton yellow = new JButton("Yellow");
+        yellow.setBackground(new Color(253, 253, 130));
         buttons.add(yellow);
 
         JButton green = new JButton("Green");
+        green.setBackground(new Color(190, 229, 176));
         buttons.add(green);
 
         JButton blue = new JButton("Blue");
+        blue.setBackground(new Color(174, 198, 230));
         buttons.add(blue);
 
         JButton purple = new JButton("Purple");
+        purple.setBackground(new Color(177, 156, 217));
         buttons.add(purple);
 
         JButton white = new JButton("White");
+        white.setBackground(Color.WHITE);
         buttons.add(white);
 
         JButton pink = new JButton("Pink");
+        pink.setBackground(Color.PINK);
         buttons.add(pink);
 
         JButton black = new JButton("Black");
+        black.setBackground(Color.LIGHT_GRAY);
         buttons.add(black);
 
         orange.addActionListener(new ActionListener() {
