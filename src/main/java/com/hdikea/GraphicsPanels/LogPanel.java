@@ -32,6 +32,7 @@ public class LogPanel extends JPanel {
     JPanel buttons = new JPanel();
     JPanel tab1 = new JPanel(new FlowLayout());
     JPanel tab2 = new JPanel(new FlowLayout());
+    JPanel tabGen = new JPanel(new FlowLayout());
     Preferences prefs = Preferences.userRoot().node(getClass().getName());
 
     public LogPanel() {
@@ -56,14 +57,16 @@ public class LogPanel extends JPanel {
         tab1.add(logLoc);
         tab2.add(BtnFolder);
         tab2.add(folderLoc);
+        tabGen.add(check);
+        tabGen.add(generate);
 
         tab1.setBackground(new Color(255, 255, 153));
         tab2.setBackground(new Color(255, 255, 153));
+        tabGen.setBackground(new Color(255, 255, 153));
 
         buttons.add(tab1);
         buttons.add(tab2);
-        buttons.add(check);
-        buttons.add(generate);
+        buttons.add(tabGen);
 
         buttons.setBackground(new Color(255, 255, 153));
         BoxLayout boxlayout = new BoxLayout(buttons, BoxLayout.Y_AXIS);

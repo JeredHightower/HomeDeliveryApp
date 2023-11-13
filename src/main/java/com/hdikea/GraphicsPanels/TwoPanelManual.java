@@ -32,6 +32,7 @@ public class TwoPanelManual extends JPanel {
     JPanel tab1 = new JPanel(new FlowLayout());
     JPanel tab2 = new JPanel(new FlowLayout());
     JPanel tab3 = new JPanel(new FlowLayout());
+    JPanel tabGen = new JPanel(new FlowLayout());
     JTabbedPane TabbedPane = new JTabbedPane();
     Preferences prefs = Preferences.userRoot().node(getClass().getName());
 
@@ -59,6 +60,9 @@ public class TwoPanelManual extends JPanel {
         JCheckBox check = new JCheckBox("Sort by location (reverse)");
         check.setSelected(true);
 
+        tabGen.add(check);
+        tabGen.add(generate);
+
         /// NEWLY ADDED
         JButton BtnLog = new JButton("Select Log (.xlsx)");
         JTextField logLoc = new JTextField("", 40);
@@ -71,12 +75,12 @@ public class TwoPanelManual extends JPanel {
         tab1.setBackground(new Color(255, 255, 153));
         tab2.setBackground(new Color(255, 255, 153));
         tab3.setBackground(new Color(255, 255, 153));
+        tabGen.setBackground(new Color(255, 255, 153));
 
         buttons.add(tab1);
         buttons.add(tab2);
         buttons.add(tab3);
-        buttons.add(check);
-        buttons.add(generate);
+        buttons.add(tabGen);
 
         buttons.setBackground(new Color(255, 255, 153));
         BoxLayout boxlayout = new BoxLayout(buttons, BoxLayout.Y_AXIS);
