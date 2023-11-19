@@ -4,7 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.apache.pdfbox.tools.imageio.ImageIOUtil;
+import javax.imageio.ImageIO;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -17,6 +18,8 @@ public class pdf2image {
      * Returns null if it failed or ran into an error
      */
     public ArrayList<File> convertManifest(String sourceDir) {
+        String targetPath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+
         try {
             File sourceFile = new File(sourceDir);
             ArrayList<File> createdFiles = new ArrayList<>();
@@ -38,9 +41,10 @@ public class pdf2image {
 
                     BufferedImage bim = pdfRenderer.renderImageWithDPI(pageCounter, 300, ImageType.RGB);
 
-                    ImageIOUtil.writeImage(bim, sourceFile.getName() + "-" + (pageCounter) + ".png", 300);
-                    File img = new File(sourceFile.getName() + "-" + (pageCounter) + ".png");
-                    createdFiles.add(img);
+                    File outputfile = new File(targetPath +  sourceFile.getName() + "-" + (pageCounter) + ".png");
+                    ImageIO.write(bim, "png", outputfile);
+
+                    createdFiles.add(outputfile);
                 }
                 document.close();
 

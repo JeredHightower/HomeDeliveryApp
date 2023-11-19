@@ -121,13 +121,14 @@ public class createTextManifest {
         }
 
         String allText = "";
-        File dir = new File(System.getProperty("user.dir"));
+        String targetPath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+        File dir = new File(targetPath);
         File[] files = dir.listFiles();
         Arrays.sort(files);
         for (File file : files)
             if (!file.isDirectory() && file.getName().endsWith("png")) {
                 // Open input image with leptonica library
-                PIX image = pixRead(file.getName());
+                PIX image = pixRead(targetPath + file.getName());
                 api.SetImage(image);
 
                 // Get OCR result
