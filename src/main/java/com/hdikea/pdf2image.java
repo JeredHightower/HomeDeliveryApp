@@ -2,6 +2,8 @@ package com.hdikea;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
@@ -18,8 +20,6 @@ public class pdf2image {
      * Returns null if it failed or ran into an error
      */
     public ArrayList<File> convertManifest(String sourceDir) {
-        String targetPath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
-
         try {
             File sourceFile = new File(sourceDir);
             ArrayList<File> createdFiles = new ArrayList<>();
@@ -35,13 +35,15 @@ public class pdf2image {
                 if(document.getNumberOfPages() < max_pages){
                     max_pages = document.getNumberOfPages();
                 }
-
+                
+                Path tempDir = Files.createTempDirectory("manitemp");
                 // Skips first page (not useful for manifest)
                 for (int pageCounter = 1; pageCounter < max_pages; pageCounter++) {
 
                     BufferedImage bim = pdfRenderer.renderImageWithDPI(pageCounter, 300, ImageType.RGB);
 
-                    File outputfile = new File(targetPath +  sourceFile.getName() + "-" + (pageCounter) + ".png");
+                    File directory = new File(tempDir.toString());
+                    File outputfile = new File(directory, sourceFile.getName() + "-" + (pageCounter) + ".png");
                     ImageIO.write(bim, "png", outputfile);
 
                     createdFiles.add(outputfile);

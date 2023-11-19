@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -121,14 +121,11 @@ public class createTextManifest {
         }
 
         String allText = "";
-        String targetPath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
-        File dir = new File(targetPath);
-        File[] files = dir.listFiles();
-        Arrays.sort(files);
-        for (File file : files)
+        Collections.sort(createdFiles);
+        for (File file : createdFiles)
             if (!file.isDirectory() && file.getName().endsWith("png")) {
                 // Open input image with leptonica library
-                PIX image = pixRead(targetPath + file.getName());
+                PIX image = pixRead(file.getAbsolutePath());
                 api.SetImage(image);
 
                 // Get OCR result
