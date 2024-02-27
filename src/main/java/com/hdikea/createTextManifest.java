@@ -79,13 +79,13 @@ public class createTextManifest {
 
                 if (m.find()) {
                     // Filter to alphanumeric and remove trailing spaces (Getting character before "Missing?"" string on manifest)
-                    //String[] name_list = currentLine.substring(0, 
-                    //m.start()).replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}'-]", " ").trim().split(" ");
+                    String[] name_list = currentLine.substring(0, 
+                    m.start()).replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}'-]", " ").trim().split(" ");
                     
                     // Take last word here //
-                    //name = name_list[name_list.length - 1];
+                    name = name_list[name_list.length - 1];
 
-                    name = currentLine.substring(0, m.start()).trim();
+                    //name = currentLine.substring(0, m.start()).trim();
 
                     customers.add(new customer(orderNumber, name, stop, truckNumber, header));
 
@@ -135,6 +135,17 @@ public class createTextManifest {
             if (!file.isDirectory() && file.getName().endsWith("png")) {
                 // Open input image with leptonica library
                 PIX image = pixRead(file.getAbsolutePath());
+
+                // Processing image
+                image = pixConvertRGBToGray(image, 0, 0, 0);
+                pixInvert(image, image);
+                pixOtsuAdaptiveThreshold(image, 100, 100, 0, 0,
+                0.1f, null, image);
+
+                pixDilateBrick(image, image,  1, 1);
+                //////////////////////
+
+
                 api.SetImage(image);
 
                 // Get OCR result
