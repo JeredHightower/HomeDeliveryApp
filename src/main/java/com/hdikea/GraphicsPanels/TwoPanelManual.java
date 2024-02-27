@@ -205,7 +205,13 @@ public class TwoPanelManual extends JPanel {
                     stillMissing = intersection(stillMissing, addedtoFinal);
                 }
 
-                JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, check.isSelected());
+                ArrayList<customer> managers = new ArrayList<>();
+                        if (!logLoc.getText().isEmpty()) {
+                            managers = new ArrayList<>(second);
+                            managers.removeIf(cust -> !cust.location.equals("Return"));
+                        }
+
+                JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, managers, check.isSelected());
                 TabbedPane.add(second.get(0).truckNumber, panel);
 
                 TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(panel),

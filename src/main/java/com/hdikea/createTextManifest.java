@@ -34,7 +34,6 @@ public class createTextManifest {
 
         relText.nextLine();
 
-        int counter = 1;
         boolean getTruckNumber = true;
         boolean getOrderNumber = false;
         boolean getName = false;
@@ -43,6 +42,7 @@ public class createTextManifest {
         String name = "";
         String truckNumber = "";
         String header = "";
+        String stop = "";
 
         ArrayList<customer> customers = new ArrayList<>();
 
@@ -62,12 +62,13 @@ public class createTextManifest {
                     getName = true;
                 }
             } else if (getOrderNumber) {
-                Pattern p = Pattern.compile("((?:LCD|CCD|LNK).*?)(\\d{9})");
+                Pattern p = Pattern.compile("((?:LCD|CCD|LNK).*?)(\\d{9})([^\\s]*)\\s+(\\d{1,2})");
                 Matcher m = p.matcher(currentLine);
 
                 if (m.find()) {
-                    header = m.group(1);
+                    header = m.group(1)+ m.group(3);
                     orderNumber = m.group(2);
+                    stop = m.group(4);
 
                     getOrderNumber = false;
                     getName = true;
@@ -77,8 +78,16 @@ public class createTextManifest {
                 Matcher m = p.matcher(currentLine);
 
                 if (m.find()) {
+                    // Filter to alphanumeric and remove trailing spaces (Getting character before "Missing?"" string on manifest)
+                    //String[] name_list = currentLine.substring(0, 
+                    //m.start()).replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}'-]", " ").trim().split(" ");
+                    
+                    // Take last word here //
+                    //name = name_list[name_list.length - 1];
+
                     name = currentLine.substring(0, m.start()).trim();
-                    customers.add(new customer(orderNumber, name, counter++, truckNumber, header));
+
+                    customers.add(new customer(orderNumber, name, stop, truckNumber, header));
 
                     getName = false;
                     getOrderNumber = true;

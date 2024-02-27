@@ -213,8 +213,14 @@ public class TwoPanel extends JPanel {
                             stillMissing = intersection(stillMissing, addedtoFinal);
                         }
 
+                        ArrayList<customer> managers = new ArrayList<>();
+                        if (!logLoc.getText().isEmpty()) {
+                            managers = new ArrayList<>(second);
+                            managers.removeIf(cust -> !cust.location.equals("Return"));
+                        }
+
                         TabbedPane.add(first.get(0).truckNumber,
-                                new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, check.isSelected()));
+                                new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, managers, check.isSelected()));
                     }
                 }
 

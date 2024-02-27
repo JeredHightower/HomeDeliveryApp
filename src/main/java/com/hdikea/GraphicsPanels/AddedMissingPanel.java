@@ -32,7 +32,7 @@ public class AddedMissingPanel extends JPanel {
     JPanel buttons = new JPanel(new FlowLayout());
 
     public AddedMissingPanel(ArrayList<customer> removedFromPre, ArrayList<customer> addedtoFinal,
-            ArrayList<customer> stillMissing, boolean reverse) {
+            ArrayList<customer> stillMissing, ArrayList<customer> managers, boolean reverse) {
         setLayout(new BorderLayout());
         
         if (reverse){
@@ -46,43 +46,64 @@ public class AddedMissingPanel extends JPanel {
         }
 
         String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
-        int total_size = removedFromPre.size() + addedtoFinal.size() + stillMissing.size();
-        String[][] data = new String[total_size + 6 + 3][column_names.length];
+        ArrayList<String[]> data_list = new ArrayList<String[]>();
 
-        data[0] = new String[] { "Added to Final Manifest", "", "", "", "", "", "" };
+        data_list.add(new String[] { "Added to Final Manifest", "", "", "", "", "", "" });
         if (addedtoFinal.isEmpty())
-            data[1] = new String[] { "Nothing Changed", "", "", "", "", "", "" };
+            data_list.add(new String[] { "Nothing Changed", "", "", "", "", "", "" });
 
-        int offset = 1;
-        for (int c = 0; c < addedtoFinal.size(); c++) {
-            customer customer = addedtoFinal.get(c);
-            data[c + offset] = new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
-                    customer.location, "" + customer.stop };
+        for (customer customer : addedtoFinal) {
+            data_list.add(new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
+                customer.location, "" + customer.stop });
         }
 
-        data[addedtoFinal.size() + 3] = new String[] { "Removed from Pre Manifest", "", "", "", "", "", "" };
+
+        data_list.add(new String[]{"", "", "", "", "", "", "" });
+
+
+        data_list.add(new String[] { "Removed from Pre Manifest", "", "", "", "", "", ""  });
         if (removedFromPre.isEmpty())
-            data[addedtoFinal.size() + 4] = new String[] { "Nothing Changed", "", "", "", "", "", "" };
+            data_list.add(new String[] { "Nothing Changed", "", "", "", "", "", "" });
 
-        offset = addedtoFinal.size() + 4;
-        for (int c = 0; c < removedFromPre.size(); c++) {
-            customer customer = removedFromPre.get(c);
-            data[c + offset] = new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
-                    customer.location, "" + customer.stop };
+        for (customer customer : removedFromPre) {
+            data_list.add(new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
+                customer.location, "" + customer.stop });
         }
 
-        /////////
-        data[addedtoFinal.size() + 3 + removedFromPre.size() + 3] = new String[] { "Still Missing From Pre Manifest", "", "", "", "", "",
-                "" };
-        if (stillMissing.isEmpty())
-            data[addedtoFinal.size() + 3 + removedFromPre.size() + 4] = new String[] { "Nothing Changed", "", "", "",
-                    "", "", "" };
 
-        offset = addedtoFinal.size() + 3 + removedFromPre.size() + 4;
-        for (int c = 0; c < stillMissing.size(); c++) {
-            customer customer = stillMissing.get(c);
-            data[c + offset] = new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
-                    customer.location, "" + customer.stop };
+        data_list.add(new String[]{"", "", "", "", "", "", "" });
+
+
+
+        data_list.add(new String[] { "Still Missing From Pre Manifest", "", "", "", "", "", ""});
+        if (stillMissing.isEmpty())
+            data_list.add(new String[] { "Nothing Changed", "", "", "", "", "", "" });
+
+        for (customer customer : stillMissing) {
+            data_list.add(new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
+                customer.location, "" + customer.stop });
+        }
+
+
+        data_list.add(new String[]{"", "", "", "", "", "", "" });
+
+
+        data_list.add(new String[] { "Returns", "", "", "", "", "", ""});
+        if (managers.isEmpty())
+            data_list.add(new String[] { "No Returns", "", "", "", "", "", "" });
+
+        for (customer customer : managers) {
+            data_list.add(new String[] { customer.header, customer.orderNumber, customer.name, customer.carts,
+                customer.location, "" + customer.stop });
+        }
+
+
+        data_list.add(new String[]{"", "", "", "", "", "", "" });
+
+        
+        String[][] data = new String [data_list.size()][7];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = data_list.get(i);
         }
 
         JTable info = new JTable(data, column_names);

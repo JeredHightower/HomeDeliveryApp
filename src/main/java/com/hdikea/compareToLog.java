@@ -91,7 +91,7 @@ public class compareToLog {
                     if (item.length > 3)
                         location = item[3].trim();
 
-                    customers.add(new customer(orderNumber, name, 0, "", carts, location, ""));
+                    customers.add(new customer(orderNumber, name, "", "", carts, location, ""));
                 }
             }
 
