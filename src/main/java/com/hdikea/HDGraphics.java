@@ -4,11 +4,9 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
 
-// import com.hdikea.GraphicsPanels.ImportPanel;
-import com.hdikea.GraphicsPanels.LogPanel;
-import com.hdikea.GraphicsPanels.TwoPanel;
-import com.hdikea.GraphicsPanels.TwoPanelManual;
-// import com.hdikea.GraphicsPanels.ViewManifestPanel;
+import com.hdikea.GraphicsPanels.Tabs.LogPanel;
+import com.hdikea.GraphicsPanels.Tabs.TwoPanel;
+import com.hdikea.GraphicsPanels.Tabs.TwoPanelManual;
 
 public class HDGraphics extends JFrame {
 

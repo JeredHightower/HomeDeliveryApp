@@ -1,4 +1,4 @@
-package com.hdikea.GraphicsPanels;
+package com.hdikea.GraphicsPanels.Tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -20,14 +19,17 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
-import com.hdikea.compareToLog;
-import com.hdikea.createTextManifest;
-import com.hdikea.customer;
+import com.hdikea.Backend.compareToLog;
+import com.hdikea.Backend.createTextManifest;
+import com.hdikea.Backend.customer;
+import com.hdikea.GraphicsPanels.Helper.Alternate.JTabbedPaneWithCloseButton;
+import com.hdikea.GraphicsPanels.Helper.Alternate.errorPanel;
+import com.hdikea.GraphicsPanels.Tables.AddedMissingPanel;
 
 /*
- * Panel Intended to for the Compare Manifests (Auto) Screen
+ * Panel Intended to for the Compare Manifests (Manual) Screen
  */
-public class TwoPanel extends JPanel {
+public class TwoPanelManual extends JPanel {
 
     JPanel buttons = new JPanel();
     JPanel tab1 = new JPanel(new FlowLayout());
@@ -37,19 +39,19 @@ public class TwoPanel extends JPanel {
     JTabbedPane TabbedPane = new JTabbedPane();
     Preferences prefs = Preferences.userRoot().node(getClass().getName());
 
-    public TwoPanel() {
+    public TwoPanelManual() {
         setLayout(new BorderLayout());
         setBackground(new Color(173, 216, 230));
         setBorder(new LineBorder(Color.BLUE));
 
-        JButton BtnPre = new JButton("Select Pre Folder");
+        JButton BtnPre = new JButton("Select Pre Manifest");
         JTextField preLoc = new JTextField("", 40);
         preLoc.setEditable(false);
         preLoc.setMaximumSize(preLoc.getPreferredSize());
         tab1.add(BtnPre);
         tab1.add(preLoc);
 
-        JButton BtnFinal = new JButton("Select Final Folder");
+        JButton BtnFinal = new JButton("Select Final Manifest");
         JTextField finaLoc = new JTextField("", 40);
         finaLoc.setEditable(false);
         finaLoc.setMaximumSize(finaLoc.getPreferredSize());
@@ -64,12 +66,14 @@ public class TwoPanel extends JPanel {
         tabGen.add(check);
         tabGen.add(generate);
 
+        /// NEWLY ADDED
         JButton BtnLog = new JButton("Select Log (.xlsx)");
         JTextField logLoc = new JTextField("", 40);
         logLoc.setEditable(false);
         logLoc.setMaximumSize(logLoc.getPreferredSize());
         tab3.add(BtnLog);
         tab3.add(logLoc);
+        ///////////////////
 
         tab1.setBackground(new Color(255, 255, 153));
         tab2.setBackground(new Color(255, 255, 153));
@@ -92,7 +96,7 @@ public class TwoPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser(
                         prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 int r = fileChooser.showOpenDialog(null);
 
                 if (r == JFileChooser.APPROVE_OPTION) {
@@ -110,7 +114,7 @@ public class TwoPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser(
                         prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 int r = fileChooser.showOpenDialog(null);
 
                 if (r == JFileChooser.APPROVE_OPTION) {
@@ -148,89 +152,79 @@ public class TwoPanel extends JPanel {
                 String preManifest = preLoc.getText();
                 String finalManifest = finaLoc.getText();
                 String logSourceDir = logLoc.getText();
+                JTabbedPaneWithCloseButton close = new JTabbedPaneWithCloseButton();
 
                 if (preManifest.isEmpty() || finalManifest.isEmpty())
                     return;
 
-                compareToLog c = new compareToLog();
+                compareToLog cLog = new compareToLog();
 
-                // Remove Current Tabs
-                TabbedPane.removeAll();
-
-                /// ADD COMPARE TO LOG TO GET LOCATIONS
+                //////
                 ArrayList<customer> logCustomers = null;
                 ArrayList<customer> logCustCopy = null;
                 if (!logLoc.getText().isEmpty()) {
-                    logCustomers = c.customersFromLog(logSourceDir);
-                    
-                    if(logCustomers != null)
+                    logCustomers = cLog.customersFromLog(logSourceDir);
+
+                    if (logCustomers != null)
                         logCustCopy = new ArrayList<>(logCustomers);
 
                     if (logCustomers == null) {
-                        TabbedPane.add("Error", new errorPanel("Error: Issue with Log"));
+                        JPanel err = new errorPanel("Error: Issue with Log");
+                        TabbedPane.add("Error", err);
+                        TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(err),
+                                close.getTitlePanel(TabbedPane, err, "Error"));
                         logLoc.setText("");
                         return;
                     }
                 }
-                ///////////////////
+                /////
 
-                createTextManifest cT = new createTextManifest();
-                ArrayList<customer> allPreCustomers = cT.getAllInformationOneList(preManifest);
-                ArrayList<customer> allFinalCustomers = cT.getAllInformationOneList(finalManifest);
+                createTextManifest c = new createTextManifest();
+                ArrayList<customer> first = c.relevantText(preManifest);
+                ArrayList<customer> second = c.relevantText(finalManifest);
 
-                if (allPreCustomers == null | allFinalCustomers == null) {
-                    TabbedPane.add("Error", new errorPanel("Error: Issue Getting Manifest Information"));
+                if (first == null || second == null) {
+                    JPanel err = new errorPanel("Error: Issue Getting Manifest Information");
+                    TabbedPane.add("Error", err);
+                    TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(err),
+                            close.getTitlePanel(TabbedPane, err, "Error"));
                     return;
                 }
 
-                // ADD COMPARE TO LOG TO GET LOCATIONS
+                ////////
                 if (!logLoc.getText().isEmpty()) {
-                    c.crossReferenceAll(allPreCustomers, logCustomers);
-                    c.crossReferenceAll(allFinalCustomers, logCustCopy);
+                    cLog.crossReferenceAll(first, logCustomers);
+                    cLog.crossReferenceAll(second, logCustCopy);
                 }
-                ///////////////
+                ////////
 
-                HashMap<String, ArrayList<customer>> pretrucks = c.getTrucks(allPreCustomers);
-                HashMap<String, ArrayList<customer>> finaltrucks = c.getTrucks(allFinalCustomers);
+                ArrayList<customer> removedFromPre = intersection(first, second);
+                ArrayList<customer> addedtoFinal = intersection(second, first);
 
-                for (String truckNumber : finaltrucks.keySet()) {
-                    ArrayList<customer> first = pretrucks.get(truckNumber);
-                    ArrayList<customer> second = finaltrucks.get(truckNumber);
+                ArrayList<customer> stillMissing = new ArrayList<>();
+                if (!logLoc.getText().isEmpty()) {
+                    stillMissing = new ArrayList<>(second);
+                    stillMissing.removeIf(cust -> !cust.location.equals("Missing"));
+                    stillMissing = intersection(stillMissing, addedtoFinal);
+                }
 
-                    if (first == null || second == null) {
-                        TabbedPane.add("Error", new errorPanel("Error: Mismatched Truck Number, Please use Manual Screen"));
-                    } else {
-                        ArrayList<customer> removedFromPre = intersection(first, second);
-                        ArrayList<customer> addedtoFinal = intersection(second, first);
-
-                        if (logCustCopy != null)
-                            logCustCopy = intersection(logCustCopy, removedFromPre);
-
-                        ArrayList<customer> stillMissing = new ArrayList<>();
-                        if (!logLoc.getText().isEmpty()) {
-                            stillMissing = new ArrayList<>(second);
-                            stillMissing.removeIf(cust -> !cust.location.equals("Missing"));
-                            stillMissing = intersection(stillMissing, addedtoFinal);
-                        }
-
-                        ArrayList<customer> managers = new ArrayList<>();
+                ArrayList<customer> managers = new ArrayList<>();
                         if (!logLoc.getText().isEmpty()) {
                             managers = new ArrayList<>(second);
                             managers.removeIf(cust -> !cust.location.equals("Return"));
                         }
 
-                        TabbedPane.add(first.get(0).truckNumber,
-                                new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, managers, check.isSelected()));
-                    }
-                }
+                JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, managers, check.isSelected());
+                TabbedPane.add(second.get(0).truckNumber, panel);
 
-                //////////
-                if (!logLoc.getText().isEmpty())
-                    TabbedPane.add("Not On Pre or Final", new ManifestPanel(logCustCopy, 1, check.isSelected()));
-                /////////
+                TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(panel),
+                        close.getTitlePanel(TabbedPane, panel, second.get(0).truckNumber));
 
                 if (TabbedPane.getTabCount() <= 0) {
-                    TabbedPane.add("Error", new errorPanel("Error: Unknown Error"));
+                    JPanel err = new errorPanel("Error: Unknown Error");
+                    TabbedPane.add("Error", err);
+                    TabbedPane.setTabComponentAt(TabbedPane.indexOfComponent(err),
+                            close.getTitlePanel(TabbedPane, err, "Error"));
                 }
             }
         });

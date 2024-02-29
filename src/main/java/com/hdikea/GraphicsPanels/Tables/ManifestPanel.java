@@ -1,4 +1,4 @@
-package com.hdikea.GraphicsPanels;
+package com.hdikea.GraphicsPanels.Tables;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -22,7 +22,7 @@ import javax.swing.KeyStroke;
 import javax.swing.JTable.PrintMode;
 import javax.swing.table.TableColumnModel;
 
-import com.hdikea.customer;
+import com.hdikea.Backend.customer;
 
 /*
  * Panel that sets up table and columns widths to view data
@@ -48,6 +48,7 @@ public class ManifestPanel extends JPanel {
 
         // Create Table
         JTable info = new JTable(data, column_names);
+        info.setCellSelectionEnabled(true);
 
         JTable printTable = new JTable();
         printTable.setModel(info.getModel());

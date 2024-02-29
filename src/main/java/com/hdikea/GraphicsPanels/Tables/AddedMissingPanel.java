@@ -1,4 +1,4 @@
-package com.hdikea.GraphicsPanels;
+package com.hdikea.GraphicsPanels.Tables;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -20,7 +20,7 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.table.TableColumnModel;
 
-import com.hdikea.customer;
+import com.hdikea.Backend.customer;
 
 /*
  * Panel is intended for the Compare Manifests Screens
@@ -107,6 +107,7 @@ public class AddedMissingPanel extends JPanel {
         }
 
         JTable info = new JTable(data, column_names);
+        info.setCellSelectionEnabled(true);
 
         JTable printTable = new JTable();
         printTable.setModel(info.getModel());

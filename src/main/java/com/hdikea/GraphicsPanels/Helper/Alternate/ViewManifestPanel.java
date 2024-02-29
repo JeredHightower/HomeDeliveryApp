@@ -1,4 +1,4 @@
-package com.hdikea.GraphicsPanels;
+package com.hdikea.GraphicsPanels.Helper.Alternate;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,9 +18,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
-import com.hdikea.compareToLog;
-import com.hdikea.createTextManifest;
-import com.hdikea.customer;
+import com.hdikea.Backend.compareToLog;
+import com.hdikea.Backend.createTextManifest;
+import com.hdikea.Backend.customer;
+import com.hdikea.GraphicsPanels.Tables.ManifestPanel;
 
 /*
  * Panel for just viewing the manifests as they are

@@ -1,4 +1,4 @@
-package com.hdikea;
+package com.hdikea.Backend;
 
 public class customer implements Comparable<customer> {
 

@@ -1,4 +1,4 @@
-package com.hdikea;
+package com.hdikea.Backend;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

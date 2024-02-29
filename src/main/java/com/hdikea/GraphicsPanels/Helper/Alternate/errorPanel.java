@@ -1,4 +1,4 @@
-package com.hdikea.GraphicsPanels;
+package com.hdikea.GraphicsPanels.Helper.Alternate;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
