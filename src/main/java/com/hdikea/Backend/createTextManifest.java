@@ -48,7 +48,7 @@ public class createTextManifest {
 
         while (relText.hasNextLine()) {
             String currentLine = relText.nextLine();
-            // System.out.println(currentLine);
+            System.out.println(currentLine);
 
             if (getTruckNumber) {
                 Pattern p = Pattern.compile(" (\\d{4})");
@@ -138,10 +138,11 @@ public class createTextManifest {
 
                 // Processing image
                 image = pixConvertRGBToGray(image, 0, 0, 0);
-                pixInvert(image, image);
-                pixOtsuAdaptiveThreshold(image, 100, 100, 0, 0,
+
+                pixOtsuAdaptiveThreshold(image, 1000, 1000, 0, 0,
                 0.1f, null, image);
 
+                pixErodeBrick(image, image, 1, 1);
                 pixDilateBrick(image, image,  1, 1);
                 //////////////////////
 
