@@ -69,7 +69,7 @@ public class TwoPanelManual extends JPanel {
         /// NEWLY ADDED
         JButton BtnLog = new JButton("Select Log (.xlsx)");
         JTextField logLoc = new JTextField("", 40);
-        logLoc.setEditable(false);
+        // logLoc.setEditable(false);
         logLoc.setMaximumSize(logLoc.getPreferredSize());
         tab3.add(BtnLog);
         tab3.add(logLoc);
