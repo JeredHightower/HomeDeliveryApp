@@ -29,6 +29,7 @@ public class createTextManifest {
 
         if (!relText.hasNextLine()) {
             System.out.println("Error, nothing found");
+            relText.close();
             return null;
         }
 
@@ -95,6 +96,8 @@ public class createTextManifest {
             }
         }
 
+        relText.close();
+
         return customers;
     }
 
@@ -139,11 +142,11 @@ public class createTextManifest {
                 // Processing image
                 image = pixConvertRGBToGray(image, 0, 0, 0);
 
-                pixOtsuAdaptiveThreshold(image, 1000, 1000, 0, 0,
-                0.1f, null, image);
+                // pixOtsuAdaptiveThreshold(image, 1000, 1000, 0, 0,
+                // 0.1f, null, image);
 
-                pixErodeBrick(image, image, 1, 1);
-                pixDilateBrick(image, image,  1, 1);
+                // pixErodeBrick(image, image, 1, 1);
+                // pixDilateBrick(image, image,  1, 1);
                 //////////////////////
 
 

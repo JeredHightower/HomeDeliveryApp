@@ -207,12 +207,14 @@ public class TwoPanelManual extends JPanel {
                     stillMissing.removeIf(cust -> !cust.location.equals("Missing"));
                     stillMissing = intersection(stillMissing, addedtoFinal);
                 }
+                else{
+                    stillMissing.add(new customer("", "", "", "", "", "", "No log used"));
+                }
 
                 ArrayList<customer> managers = new ArrayList<>();
-                        if (!logLoc.getText().isEmpty()) {
-                            managers = new ArrayList<>(second);
-                            managers.removeIf(cust -> !cust.location.equals("Return"));
-                        }
+                managers = new ArrayList<>(second);
+                managers.removeIf(cust -> !cust.isReturn());
+
 
                 JPanel panel = new AddedMissingPanel(removedFromPre, addedtoFinal, stillMissing, managers, check.isSelected());
                 TabbedPane.add(second.get(0).truckNumber, panel);
