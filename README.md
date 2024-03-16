@@ -29,6 +29,9 @@ Orders will be sorted in reverse alphabetical order based on locations from the 
 
 *Tip: After generating a result, press CTRL+P to print the page*
 
+<img width="890" alt="Screen Shot 2024-03-15 at 10 34 47 PM" src="https://github.com/JeredHightower/HomeDeliveryApp/assets/95993968/84b69ff8-1e9d-4462-8b03-f9184e53426f">
+
+
   
 
 ## 2. Compare Manifests (Auto) 
@@ -46,9 +49,13 @@ Then select each folder in the app and click generate. What was added and remove
 
 The "Cage Log.xlsx" can be selected to add locations for all the orders (but it is not required). 
 
+<img width="891" alt="Screen Shot 2024-03-15 at 10 36 08 PM" src="https://github.com/JeredHightower/HomeDeliveryApp/assets/95993968/e4b45f3c-c393-49c2-a9b0-a741e8fe96b2">
+
+
+
  
 
 ## 3. Compare Manifests (Manual) 
-Functionally the same as auto except that you select each pre and final manifest and generate each result. 
+Functionally the same as auto except that you select each pre and final manifest file and generate each result. 
 
 It is necessary to use this screen if truck numbers are changed from pre to final manifest. 
