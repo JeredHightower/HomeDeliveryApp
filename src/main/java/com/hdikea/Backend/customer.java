@@ -2,7 +2,7 @@ package com.hdikea.Backend;
 
 public class customer implements Comparable<customer> {
 
-    public String header;
+    public String header; // Now the Work Order #
     public String orderNumber;
     public String name;
     public String stop;
@@ -34,15 +34,6 @@ public class customer implements Comparable<customer> {
 
         return false;
     }
-
-    /*
-    public boolean isReturn() {
-        if (header.contains("RTV"))
-            return true;
-
-        return false;
-    }
-    */
 
     public boolean isCCD(){
         if(header.contains("CCD"))

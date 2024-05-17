@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -15,12 +16,13 @@ public class compareToLog {
 
     /*
      * Takes a list of customers
-     * Returns a hashmap with each key as a truck number and its contents being the list of customers for that truck
+     * Returns a hashmap with each key as a truck number and its contents being the
+     * list of customers for that truck
      */
     public HashMap<String, ArrayList<customer>> getTrucks(ArrayList<customer> allCustomers) {
         HashMap<String, ArrayList<customer>> trucks = new HashMap<String, ArrayList<customer>>();
 
-        if(allCustomers == null)
+        if (allCustomers == null)
             return null;
 
         for (customer customer : allCustomers) {
@@ -33,9 +35,9 @@ public class compareToLog {
         return trucks;
     }
 
-
     /*
-     * Takes a filepath to an excel file and converts excel rows into customer objects
+     * Takes a filepath to an excel file and converts excel rows into customer
+     * objects
      * Returns a list of customers
      */
     public ArrayList<customer> customersFromLog(String logSourceDir) {
@@ -57,10 +59,9 @@ public class compareToLog {
                 xlsx.close();
                 sc.close();
                 return null;
-            }
-            else{
-            // Skip title line (Sheet name)
-            System.out.println(sc.nextLine());
+            } else {
+                // Skip title line (Sheet name)
+                System.out.println(sc.nextLine());
             }
 
             if (!sc.hasNextLine()) {
@@ -71,7 +72,6 @@ public class compareToLog {
 
             // Skip first line (Column names)
             System.out.println(sc.nextLine());
-            
 
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
@@ -107,6 +107,85 @@ public class compareToLog {
         return null;
     }
 
+    public ArrayList<customer> customersFromSheets(String logSourceDir) {
+        ArrayList<customer> customers = new ArrayList<customer>();
+
+        try {
+            File fl = new File(logSourceDir);
+
+            if (!fl.getName().endsWith("xlsx") || !fl.exists())
+                return null;
+
+            XSSFWorkbook input = new XSSFWorkbook(fl);
+
+            XSSFExcelExtractor xlsx = new XSSFExcelExtractor(input);
+            String tsv = xlsx.getText();
+            Scanner sc = new Scanner(tsv);
+
+            if (!sc.hasNextLine()) {
+                xlsx.close();
+                sc.close();
+                return null;
+            } else {
+                // Skip title line (Sheet name)
+                System.out.println(sc.nextLine());
+            }
+
+            if (!sc.hasNextLine()) {
+                xlsx.close();
+                sc.close();
+                return null;
+            }
+
+            int route = 0;
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                if (!line.isEmpty()) {
+                    String[] item = line.split("\t");
+
+                    if (item.length > 0 && !item[0].trim().equals("#")) {
+
+                        String name = "";
+                        String orderNumber = "";
+                        String stop = "";
+                        String workOrderNumber = "";
+
+                        if (item.length > 1)
+                            orderNumber = item[1].trim();
+                        if (item.length > 2)
+                            workOrderNumber = item[2].trim();
+                        
+
+                        if (item.length > 4)
+                            name = item[4].trim();
+                        if (item.length > 5)
+                            stop = item[5].trim();
+
+
+                        customer newCust = new customer(orderNumber, name, stop, "Route " + route, "", "Missing", workOrderNumber);
+
+                        if(!containsOrderNumber(customers, orderNumber))
+                            customers.add(newCust);
+                    } else
+                        route++;
+                }
+            }
+
+            xlsx.close();
+            sc.close();
+            return customers;
+
+        } catch (InvalidFormatException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public boolean containsOrderNumber(final List<customer> list, final String order) {
+        return list.stream().anyMatch(cust -> order.equals(cust.orderNumber));
+    }
 
     /*
      * Adds locations to allCustomers using information from customersFromLog
@@ -119,19 +198,19 @@ public class compareToLog {
 
         ArrayList<customer> exchanges = new ArrayList<>();
 
-        if(allCustomers == null | customersFromLog == null)
-                return null;
+        if (allCustomers == null | customersFromLog == null)
+            return null;
 
         for (customer customer : allCustomers) {
 
-            if(customer.isRemoval()){
+            if (customer.isRemoval()) {
                 customer.location = "Removal";
             }
 
             if (customer.isReturn() && !customer.isXChange())
                 customer.location = "Return";
 
-            if (customer.isCCD()){
+            if (customer.isCCD()) {
                 customer.location = "!CCD";
             }
 
@@ -140,11 +219,11 @@ public class compareToLog {
                     break;
                 }
 
-                if(customer.isRemoval()){
+                if (customer.isRemoval()) {
                     break;
                 }
 
-                if (customer.isCCD()){
+                if (customer.isCCD()) {
                     break;
                 }
 
@@ -153,14 +232,13 @@ public class compareToLog {
                     customer.location = customer2.location;
                     customer.carts = customer2.carts;
 
-
                     // Set exchanges Manager to no carts
                     if (customer.isReturn()) {
                         customer.carts = "";
                     }
 
                     // Add exchanges to list to remove later
-                    if(customer.isXChange())
+                    if (customer.isXChange())
                         exchanges.add(customer2);
                     else
                         it.remove();
@@ -170,8 +248,8 @@ public class compareToLog {
             }
         }
 
-        for (Iterator<customer> it = customersFromLog.iterator(); it.hasNext();){
-            if(exchanges.contains(it.next()))
+        for (Iterator<customer> it = customersFromLog.iterator(); it.hasNext();) {
+            if (exchanges.contains(it.next()))
                 it.remove();
         }
 

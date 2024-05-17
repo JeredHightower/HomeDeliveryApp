@@ -19,7 +19,6 @@ import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
 import com.hdikea.Backend.compareToLog;
-import com.hdikea.Backend.createTextManifest;
 import com.hdikea.Backend.customer;
 import com.hdikea.GraphicsPanels.Tables.ManifestPanel;
 
@@ -82,9 +81,8 @@ public class ViewManifestPanel extends JPanel {
                 if (sourceDir.isEmpty())
                     return;
 
-                createTextManifest cT = new createTextManifest();
                 compareToLog c = new compareToLog();
-                ArrayList<customer> allCustomers = cT.getAllInformationOneList(sourceDir);
+                ArrayList<customer> allCustomers = c.customersFromSheets(sourceDir);;
                 HashMap<String, ArrayList<customer>> trucks = c.getTrucks(allCustomers);
 
                 TabbedPane.removeAll();

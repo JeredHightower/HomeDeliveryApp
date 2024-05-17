@@ -20,7 +20,6 @@ import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
 import com.hdikea.Backend.compareToLog;
-import com.hdikea.Backend.createTextManifest;
 import com.hdikea.Backend.customer;
 import com.hdikea.GraphicsPanels.Helper.Alternate.errorPanel;
 import com.hdikea.GraphicsPanels.Tables.ManifestPanel;
@@ -47,9 +46,9 @@ public class LogPanel extends JPanel {
         JButton BtnLog = new JButton("Select Log (.xlsx)");
         JTextField logLoc = new JTextField("", 40);
         // logLoc.setEditable(false);
-        JButton BtnFolder = new JButton("Select Manifest Folder");
-        JTextField folderLoc = new JTextField("", 40);
-        folderLoc.setEditable(false);
+        JButton BtnSheets = new JButton("Select RunSheets (.xlsx)");
+        JTextField SheetsLoc = new JTextField("", 40);
+        SheetsLoc.setEditable(false);
         JButton generate = new JButton("Generate");
 
         JCheckBox check = new JCheckBox("Sort by location (reverse)");
@@ -57,8 +56,8 @@ public class LogPanel extends JPanel {
 
         tab1.add(BtnLog);
         tab1.add(logLoc);
-        tab2.add(BtnFolder);
-        tab2.add(folderLoc);
+        tab2.add(BtnSheets);
+        tab2.add(SheetsLoc);
         tabGen.add(check);
         tabGen.add(generate);
 
@@ -77,16 +76,16 @@ public class LogPanel extends JPanel {
         add(buttons, BorderLayout.PAGE_START);
         add(TabbedPane, BorderLayout.CENTER);
 
-        BtnFolder.addActionListener(new ActionListener() {
+        BtnSheets.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser(
                         prefs.get("LAST_USED_FOLDER", new File(".").getAbsolutePath()));
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 int r = fileChooser.showOpenDialog(null);
 
                 if (r == JFileChooser.APPROVE_OPTION) {
                     // set the label to the path of the selected directory
-                    folderLoc.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                    SheetsLoc.setText(fileChooser.getSelectedFile().getAbsolutePath());
                     prefs.put("LAST_USED_FOLDER", fileChooser.getSelectedFile().getParent());
                 }
                 // if the user cancelled the operation
@@ -115,7 +114,7 @@ public class LogPanel extends JPanel {
 
         generate.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String sourceDir = folderLoc.getText();
+                String sourceDir = SheetsLoc.getText();
                 String logSourceDir = logLoc.getText();
 
                 // Check if input is empty (If no manifest folder given, don't generate. If only manifest
@@ -134,11 +133,10 @@ public class LogPanel extends JPanel {
                     return;
                 }
 
-                // Get customers from manifest
-                createTextManifest cT = new createTextManifest();
-                ArrayList<customer> allCustomers = cT.getAllInformationOneList(sourceDir);
+                // Get customers from sheets
+                ArrayList<customer> allCustomers = c.customersFromSheets(sourceDir);
                 if (allCustomers == null) {
-                    TabbedPane.add("Error", new errorPanel("Error: Issue Getting Manifest Information"));
+                    TabbedPane.add("Error", new errorPanel("Error: Issue Getting RunSheet Information"));
                     return;
                 }
                 

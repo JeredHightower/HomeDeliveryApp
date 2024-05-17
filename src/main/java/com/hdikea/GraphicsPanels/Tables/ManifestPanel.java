@@ -37,11 +37,11 @@ public class ManifestPanel extends JPanel {
 
         /// false, false: View Manifest - 0 | true, true: Extra Orders - 1 | true, false: ComparingtoLog - 2
         // Setup Column Names
-        String[] column_names = { "Header", "Order Number", "Name", "Carts", "Location", "Stop" };
+        String[] column_names = { "Work Order #", "Order Number", "Name", "Carts", "Location", "Stop" };
         if (code == 1)
-            column_names = new String[] { "Order Number", "Name", "Carts", "Location" };
+            column_names = new String[] { "Work Order #", "Name", "Carts", "Location" };
         else if (code == 0)
-            column_names = new String[] { "Header", "Order Number", "Name", "Stop" };
+            column_names = new String[] { "Work Order #", "Order Number", "Name", "Stop" };
 
         // Generate Matrix
         String[][] data = generateTableMatrix(customers, code, reverse);
@@ -62,28 +62,28 @@ public class ManifestPanel extends JPanel {
             printTable.getColumnModel().getColumn(2).setWidth(35);
             printTable.getColumnModel().getColumn(3).setWidth(75);
 
-            columnWidthPercentage = new float[] { .175f * (1.0f / .61f), .25f * (1.0f / .61f), .06f * (1.0f / .61f),
-                    .125f * (1.0f / .61f) };
+            columnWidthPercentage = new float[] { .175f * (1.0f / .735f), .25f * (1.0f / .735f), .06f * (1.0f / .735f),
+                    .25f * (1.0f / .735f) };
         } else if (code == 0) {
             // { customer.header, customer.orderNumber, customer.name, "" + customer.stop };
-            printTable.getColumnModel().getColumn(0).setWidth(200);
+            printTable.getColumnModel().getColumn(0).setWidth(100);
             // printTable.getColumnModel().getColumn(1).setWidth(200);
-            printTable.getColumnModel().getColumn(2).setWidth(150);
+            printTable.getColumnModel().getColumn(2).setWidth(250);
             printTable.getColumnModel().getColumn(3).setWidth(35);
 
-            columnWidthPercentage = new float[] { .33f * (1.0f / .815f), .175f * (1.0f / .815f), .25f * (1.0f / .815f),
-                    .06f * (1.0f / .815f) };
+            columnWidthPercentage = new float[] { .205f * (1.0f / .69f), .175f * (1.0f / .69f), .25f * (1.0f / .69f),
+                    .06f * (1.0f / .69f) };
         } else {
             // {.33f, .175f, .25f, .06f, .125f, .06f}
             // Header, Order Number, Name, Carts, Location, Stop
-            printTable.getColumnModel().getColumn(0).setWidth(200);
+            printTable.getColumnModel().getColumn(0).setWidth(100);
             // printTable.getColumnModel().getColumn(1).setWidth(105);
             printTable.getColumnModel().getColumn(2).setWidth(150);
             printTable.getColumnModel().getColumn(3).setWidth(35);
-            printTable.getColumnModel().getColumn(4).setWidth(75);
+            printTable.getColumnModel().getColumn(4).setWidth(150);
             printTable.getColumnModel().getColumn(5).setWidth(35);
 
-            columnWidthPercentage = new float[] { .33f, .175f, .25f, .06f, .125f, .06f };
+            columnWidthPercentage = new float[] { .205f, .175f, .25f, .06f, .25f, .06f };
         }
 
         printTable.setSize(printTable.getPreferredSize());
