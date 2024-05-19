@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class compareToLog {
@@ -51,52 +52,53 @@ public class compareToLog {
 
             XSSFWorkbook input = new XSSFWorkbook(fl);
 
-            XSSFExcelExtractor xlsx = new XSSFExcelExtractor(input);
-            String tsv = xlsx.getText();
-            Scanner sc = new Scanner(tsv);
+            int nameIndex = 0;
+            int cartIndex = 0;
+            int orderIndex = 0;
+            int locaIndex = 0;
 
-            if (!sc.hasNextLine()) {
-                xlsx.close();
-                sc.close();
-                return null;
-            } else {
-                // Skip title line (Sheet name)
-                System.out.println(sc.nextLine());
-            }
+            Iterator<Row> rowIterator = input.getSheetAt(0).iterator();
+            DataFormatter formatter = new DataFormatter();
 
-            if (!sc.hasNextLine()) {
-                xlsx.close();
-                sc.close();
-                return null;
-            }
+            if (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
 
-            // Skip first line (Column names)
-            System.out.println(sc.nextLine());
-
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
-                if (!line.isEmpty()) {
-                    String[] item = line.split("\t");
-                    String name = "";
-                    String carts = "";
-                    String orderNumber = "";
-                    String location = "";
-
-                    if (item.length > 0)
-                        name = item[0].trim();
-                    if (item.length > 1)
-                        carts = item[1].trim();
-                    if (item.length > 2)
-                        orderNumber = item[2].trim();
-                    if (item.length > 3)
-                        location = item[3].trim();
-
-                    customers.add(new customer(orderNumber, name, "", "", carts, location, ""));
+                short maxCol = row.getLastCellNum();
+                for (short i = 0; i < maxCol; i++) {
+                    Cell cell = row.getCell(i);
+                    if (formatter.formatCellValue(cell).trim().equals("LAST NAME")) {
+                        nameIndex = i;
+                    }
+                    if (formatter.formatCellValue(cell).equals("C")) {
+                        cartIndex = i;
+                    }
+                    if (formatter.formatCellValue(cell).equals("LOCATION")) {
+                        locaIndex = i;
+                    }
+                    if (formatter.formatCellValue(cell).equals("ORDER NUMBER")) {
+                        orderIndex = i;
+                    }
                 }
             }
 
-            xlsx.close();
-            sc.close();
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+
+                String name = "";
+                String carts = "";
+                String orderNumber = "";
+                String location = "";
+
+                name = formatter.formatCellValue(row.getCell(nameIndex)).trim();
+                carts = formatter.formatCellValue(row.getCell(cartIndex)).trim();
+                orderNumber = formatter.formatCellValue(row.getCell(orderIndex)).trim();
+                location = formatter.formatCellValue(row.getCell(locaIndex)).trim();
+
+                customers.add(new customer(orderNumber, name, "", "", carts, location, ""));
+
+            }
+
+            input.close();
             return customers;
 
         } catch (InvalidFormatException | IOException e) {
@@ -118,61 +120,59 @@ public class compareToLog {
 
             XSSFWorkbook input = new XSSFWorkbook(fl);
 
-            XSSFExcelExtractor xlsx = new XSSFExcelExtractor(input);
-            String tsv = xlsx.getText();
-            Scanner sc = new Scanner(tsv);
-
-            if (!sc.hasNextLine()) {
-                xlsx.close();
-                sc.close();
-                return null;
-            } else {
-                // Skip title line (Sheet name)
-                System.out.println(sc.nextLine());
-            }
-
-            if (!sc.hasNextLine()) {
-                xlsx.close();
-                sc.close();
-                return null;
-            }
-
             int route = 0;
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
-                if (!line.isEmpty()) {
-                    String[] item = line.split("\t");
+            int nameIndex = 0;
+            int stopIndex = 0;
+            int orderIndex = 0;
+            int workIndex = 0;
 
-                    if (item.length > 0 && !item[0].trim().equals("#")) {
+            Iterator<Row> rowIterator = input.getSheetAt(0).iterator();
+            DataFormatter formatter = new DataFormatter();
 
-                        String name = "";
-                        String orderNumber = "";
-                        String stop = "";
-                        String workOrderNumber = "";
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
 
-                        if (item.length > 1)
-                            orderNumber = item[1].trim();
-                        if (item.length > 2)
-                            workOrderNumber = item[2].trim();
-                        
+                if (!formatter.formatCellValue(row.getCell(0)).trim().equals("#")) {
 
-                        if (item.length > 4)
-                            name = item[4].trim();
-                        if (item.length > 5)
-                            stop = item[5].trim();
+                    String name = "";
+                    String orderNumber = "";
+                    String stop = "";
+                    String workOrderNumber = "";
 
+                    orderNumber = formatter.formatCellValue(row.getCell(orderIndex)).trim();
+                    workOrderNumber = formatter.formatCellValue(row.getCell(workIndex)).trim();
+                    name = formatter.formatCellValue(row.getCell(nameIndex)).trim();
+                    stop = formatter.formatCellValue(row.getCell(stopIndex)).trim();
 
-                        customer newCust = new customer(orderNumber, name, stop, "Route " + route, "", "Missing", workOrderNumber);
+                    customer newCust = new customer(orderNumber, name, stop, "Route " + route, "", "Missing",
+                            workOrderNumber);
 
-                        if(!containsOrderNumber(customers, orderNumber))
-                            customers.add(newCust);
-                    } else
-                        route++;
+                    if (!containsOrderNumber(customers, orderNumber))
+                        customers.add(newCust);
+                } else {
+                    short maxCol = row.getLastCellNum();
+                    for (short i = 0; i < maxCol; i++) {
+                        Cell cell = row.getCell(i);
+                        if (formatter.formatCellValue(cell).trim().equals("Customer Name")) {
+                            nameIndex = i;
+                        }
+                        if (formatter.formatCellValue(cell).equals("Stop Number")) {
+                            stopIndex = i;
+                        }
+                        if (formatter.formatCellValue(cell).equals("Work Order #")) {
+                            workIndex = i;
+                        }
+                        if (formatter.formatCellValue(cell).equals("Sales Order #")
+                                || formatter.formatCellValue(cell).equals("Sales Order Number")) {
+                            orderIndex = i;
+                        }
+                    }
+
+                    route++;
                 }
             }
 
-            xlsx.close();
-            sc.close();
+            input.close();
             return customers;
 
         } catch (InvalidFormatException | IOException e) {
