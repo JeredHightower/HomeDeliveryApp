@@ -39,7 +39,7 @@ public class ManifestPanel extends JPanel {
         // Setup Column Names
         String[] column_names = { "Work Order #", "Order Number", "Name", "Carts", "Location", "Stop" };
         if (code == 1)
-            column_names = new String[] { "Work Order #", "Name", "Carts", "Location" };
+            column_names = new String[] { "Order Number", "Name", "Carts", "Location" };
         else if (code == 0)
             column_names = new String[] { "Work Order #", "Order Number", "Name", "Stop" };
 

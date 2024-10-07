@@ -53,9 +53,9 @@ public class compareToLog {
             XSSFWorkbook input = new XSSFWorkbook(fl);
 
             int nameIndex = 0;
-            int cartIndex = 0;
-            int orderIndex = 0;
-            int locaIndex = 0;
+            int cartIndex = 1;
+            int orderIndex = 2;
+            int locaIndex = 3;
 
             Iterator<Row> rowIterator = input.getSheetAt(0).iterator();
             DataFormatter formatter = new DataFormatter();
@@ -66,16 +66,17 @@ public class compareToLog {
                 short maxCol = row.getLastCellNum();
                 for (short i = 0; i < maxCol; i++) {
                     Cell cell = row.getCell(i);
-                    if (formatter.formatCellValue(cell).trim().equals("LAST NAME")) {
+                    String strCell = formatter.formatCellValue(cell).replace("\u00A0", " ").trim();
+                    if (strCell.equals("LAST NAME")) {
                         nameIndex = i;
                     }
-                    if (formatter.formatCellValue(cell).equals("C")) {
+                    if (strCell.equals("C")) {
                         cartIndex = i;
                     }
-                    if (formatter.formatCellValue(cell).equals("LOCATION")) {
+                    if (strCell.equals("LOCATION")) {
                         locaIndex = i;
                     }
-                    if (formatter.formatCellValue(cell).equals("ORDER NUMBER")) {
+                    if (strCell.equals("ORDER NUMBER")) {
                         orderIndex = i;
                     }
                 }
@@ -89,12 +90,13 @@ public class compareToLog {
                 String orderNumber = "";
                 String location = "";
 
-                name = formatter.formatCellValue(row.getCell(nameIndex)).trim();
-                carts = formatter.formatCellValue(row.getCell(cartIndex)).trim();
-                orderNumber = formatter.formatCellValue(row.getCell(orderIndex)).trim();
-                location = formatter.formatCellValue(row.getCell(locaIndex)).trim();
+                name = formatter.formatCellValue(row.getCell(nameIndex)).replace("\u00A0", " ").trim();
+                carts = formatter.formatCellValue(row.getCell(cartIndex)).replace("\u00A0", " ").trim();
+                orderNumber = formatter.formatCellValue(row.getCell(orderIndex)).replace("\u00A0", " ").trim();
+                location = formatter.formatCellValue(row.getCell(locaIndex)).replace("\u00A0", " ").trim();
 
-                customers.add(new customer(orderNumber, name, "", "", carts, location, ""));
+                if(!orderNumber.isBlank())
+                    customers.add(new customer(orderNumber, name, "", "", carts, location, ""));
 
             }
 
@@ -132,37 +134,40 @@ public class compareToLog {
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
 
-                if (!formatter.formatCellValue(row.getCell(0)).trim().equals("#")) {
+                if (!formatter.formatCellValue(row.getCell(0)).replace("\u00A0", " ").trim().equals("#")) {
 
                     String name = "";
                     String orderNumber = "";
                     String stop = "";
                     String workOrderNumber = "";
 
-                    orderNumber = formatter.formatCellValue(row.getCell(orderIndex)).trim();
-                    workOrderNumber = formatter.formatCellValue(row.getCell(workIndex)).trim();
-                    name = formatter.formatCellValue(row.getCell(nameIndex)).trim();
-                    stop = formatter.formatCellValue(row.getCell(stopIndex)).trim();
+                    orderNumber = formatter.formatCellValue(row.getCell(orderIndex)).replace("\u00A0", " ").trim();
+                    workOrderNumber = formatter.formatCellValue(row.getCell(workIndex)).replace("\u00A0", " ").trim();
+                    name = formatter.formatCellValue(row.getCell(nameIndex)).replace("\u00A0", " ").trim();
+                    stop = formatter.formatCellValue(row.getCell(stopIndex)).replace("\u00A0", " ").trim();
 
+                    
                     customer newCust = new customer(orderNumber, name, stop, "Route " + route, "", "Missing",
                             workOrderNumber);
 
-                    if (!containsOrderNumber(customers, orderNumber))
+                    if (!containsOrderNumber(customers, orderNumber) && !orderNumber.isBlank())
                         customers.add(newCust);
                 } else {
                     short maxCol = row.getLastCellNum();
                     for (short i = 0; i < maxCol; i++) {
                         Cell cell = row.getCell(i);
-                        if (formatter.formatCellValue(cell).trim().equals("Customer Name")) {
+                        String strCell = formatter.formatCellValue(cell).replace("\u00A0", " ").trim();
+                        System.out.println(strCell + "!");
+                        if (strCell.equals("Customer Name")) {
                             nameIndex = i;
                         }
-                        if (formatter.formatCellValue(cell).equals("Stop Number")) {
+                        if (strCell.equals("Stop Number")) {
                             stopIndex = i;
                         }
-                        if (formatter.formatCellValue(cell).equals("Work Order #")) {
+                        if (strCell.equals("Work Order #")) {
                             workIndex = i;
                         }
-                        if (formatter.formatCellValue(cell).equals("Sales Order #")
+                        if (strCell.equals("Sales Order #")
                                 || formatter.formatCellValue(cell).equals("Sales Order Number")) {
                             orderIndex = i;
                         }
